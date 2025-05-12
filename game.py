@@ -9,7 +9,7 @@ from tower import Tower, BasicTower, RapidTower, SniperTower
 from soldier import Soldier
 from enemy import Enemy, BasicEnemy, FastEnemy, TankEnemy
 from projectile import Projectile
-from ui.menu import Menu
+from menu import Menu
 
 class Game:
     def __init__(self):
