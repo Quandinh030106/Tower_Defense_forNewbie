@@ -1,67 +1,96 @@
 import pygame
 from typing import Tuple, Optional
 from constants import *
+from maps import MAPS, DIFFICULTY_SETTINGS
 
 class Menu:
     def __init__(self):
-        self.buttons = [
-            {"text": "Basic Tower (50)", "cost": 50, "type": "basic_tower"},
-            {"text": "Sniper Tower (100)", "cost": 100, "type": "sniper_tower"},
-            {"text": "Rapid Tower (75)", "cost": 75, "type": "rapid_tower"},
-            {"text": "Soldier (30)", "cost": 30, "type": "soldier"},
-            {"text": "Start Wave", "type": "start_wave"},
-            {"text": "Quit Game", "type": "quit"}
-        ]
         self.button_height = 40
-        self.button_width = 180
+        self.button_width = 120
         self.button_margin = 10
-        self.menu_x = SCREEN_WIDTH - self.button_width - 20
-        self.menu_y = 20
+        self.buttons = {}
+        self.create_buttons()
         
-    def draw(self, screen: pygame.Surface, gold: int, wave: int, lives: int):
-        # Draw menu background
-        pygame.draw.rect(screen, (50, 50, 50), (self.menu_x - 10, 0, self.button_width + 30, SCREEN_HEIGHT))
+    def create_buttons(self):
+        # Tower buttons
+        y = 100
+        self.buttons["basic_tower"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 10, y, self.button_width, self.button_height)
+        y += self.button_height + self.button_margin
+        self.buttons["rapid_tower"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 10, y, self.button_width, self.button_height)
+        y += self.button_height + self.button_margin
+        self.buttons["sniper_tower"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 10, y, self.button_width, self.button_height)
+        y += self.button_height + self.button_margin
+        self.buttons["soldier"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 10, y, self.button_width, self.button_height)
+        
+        # Game control buttons
+        y += self.button_height + self.button_margin * 2
+        self.buttons["start_wave"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 10, y, self.button_width, self.button_height)
+        y += self.button_height + self.button_margin
+        self.buttons["quit"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 10, y, self.button_width, self.button_height)
+        
+        # Map selection buttons
+        y += self.button_height + self.button_margin * 2
+        for map_name in MAPS.keys():
+            self.buttons[f"map_{map_name}"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 10, y, self.button_width, self.button_height)
+            y += self.button_height + self.button_margin
+            
+        # Difficulty selection buttons
+        y += self.button_margin
+        for difficulty in DIFFICULTY_SETTINGS.keys():
+            self.buttons[f"diff_{difficulty}"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 10, y, self.button_width, self.button_height)
+            y += self.button_height + self.button_margin
+    
+    def draw(self, screen, gold, wave, lives):
+        # Draw background
+        pygame.draw.rect(screen, (50, 50, 50), (SCREEN_WIDTH - 200, 0, 200, SCREEN_HEIGHT))
         
         # Draw game info
-        gold_text = GAME_FONT.render(f"Gold: {gold}", True, YELLOW)
+        gold_text = GAME_FONT.render(f"Gold: {gold}", True, WHITE)
         wave_text = GAME_FONT.render(f"Wave: {wave}", True, WHITE)
-        lives_text = GAME_FONT.render(f"Lives: {lives}", True, RED)
+        lives_text = GAME_FONT.render(f"Lives: {lives}", True, WHITE)
         
-        screen.blit(gold_text, (self.menu_x, 20))
-        screen.blit(wave_text, (self.menu_x, 50))
-        screen.blit(lives_text, (self.menu_x, 80))
+        screen.blit(gold_text, (SCREEN_WIDTH - 190, 10))
+        screen.blit(wave_text, (SCREEN_WIDTH - 190, 35))
+        screen.blit(lives_text, (SCREEN_WIDTH - 190, 60))
         
-        # Draw buttons
-        for i, button in enumerate(self.buttons):
-            button_y = self.menu_y + (self.button_height + self.button_margin) * (i + 3)
-            
-            # Check if player can afford the tower
-            can_afford = True
-            if "cost" in button and button["cost"] > gold:
-                can_afford = False
-                
-            color = (100, 100, 100) if can_afford else (50, 50, 50)
-            pygame.draw.rect(screen, color, (self.menu_x, button_y, self.button_width, self.button_height))
-            pygame.draw.rect(screen, BLACK, (self.menu_x, button_y, self.button_width, self.button_height), 2)
-            
-            # Button text
-            text = GAME_FONT.render(button["text"], True, WHITE if can_afford else GRAY)
-            text_rect = text.get_rect(center=(self.menu_x + self.button_width//2, button_y + self.button_height//2))
-            screen.blit(text, text_rect)
+        # Draw tower buttons
+        self.draw_button(screen, "Basic Tower (50g)", "basic_tower", gold >= 50)
+        self.draw_button(screen, "Rapid Tower (75g)", "rapid_tower", gold >= 75)
+        self.draw_button(screen, "Sniper Tower (100g)", "sniper_tower", gold >= 100)
+        self.draw_button(screen, "Soldier (30g)", "soldier", gold >= 30)
+        
+        # Draw game control buttons
+        self.draw_button(screen, "Start Wave", "start_wave", True)
+        self.draw_button(screen, "Quit", "quit", True)
+        
     
-    def handle_click(self, mouse_pos: Tuple[int, int], gold: int) -> Tuple[Optional[str], int]:
-        x, y = mouse_pos
+    def draw_button(self, screen, text, button_id, enabled):
+        button = self.buttons[button_id]
+        color = (100, 100, 100) if enabled else (50, 50, 50)
+        pygame.draw.rect(screen, color, button)
+        pygame.draw.rect(screen, BLACK, button, 2)
         
-        for i, button in enumerate(self.buttons):
-            button_y = self.menu_y + (self.button_height + self.button_margin) * (i + 3)
-            
-            if (self.menu_x <= x <= self.menu_x + self.button_width and 
-                button_y <= y <= button_y + self.button_height):
-                
-                # Check if player can afford the tower
-                if "cost" in button and button["cost"] > gold:
-                    return None, 0  # Can't afford
-                    
-                return button["type"], button.get("cost", 0)
-                
-        return None, 0  # No button clicked 
+        text_surface = GAME_FONT.render(text, True, WHITE if enabled else (100, 100, 100))
+        text_rect = text_surface.get_rect(center=button.center)
+        screen.blit(text_surface, text_rect)
+    
+    def handle_click(self, pos, gold):
+        for button_id, button in self.buttons.items():
+            if button.collidepoint(pos):
+                if button_id == "basic_tower" and gold >= 50:
+                    return "basic_tower", 50
+                elif button_id == "rapid_tower" and gold >= 75:
+                    return "rapid_tower", 75
+                elif button_id == "sniper_tower" and gold >= 100:
+                    return "sniper_tower", 100
+                elif button_id == "soldier" and gold >= 30:
+                    return "soldier", 30
+                elif button_id == "start_wave":
+                    return "start_wave", 0
+                elif button_id == "quit":
+                    return "quit", 0
+                elif button_id.startswith("map_"):
+                    return f"select_map_{button_id[4:]}", 0
+                elif button_id.startswith("diff_"):
+                    return f"select_difficulty_{button_id[5:]}", 0
+        return None, 0 
