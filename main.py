@@ -1,9 +1,9 @@
 import pygame
 import sys
 from game import Game
-from ui.welcome_screen import WelcomeScreen
-from ui.map_selection import MapSelection
-from ui.difficulty_selection import DifficultySelection
+from welcome_screen import WelcomeScreen
+from map_selection import MapSelection
+from difficulty_selection import DifficultySelection
 from constants import *
 
 def main():

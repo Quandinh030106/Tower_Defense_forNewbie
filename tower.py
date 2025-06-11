@@ -2,7 +2,7 @@ import math
 import pygame
 from typing import List, Optional, Tuple
 from constants import *
-from entities.projectile import Projectile
+from projectile import Projectile
 
 class Tower:
     def __init__(self, grid_x: int, grid_y: int, damage: int, range_radius: int, fire_rate: float, cost: int):
