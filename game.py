@@ -5,11 +5,11 @@ import random
 from typing import List, Tuple, Dict, Optional
 
 from constants import *
-from entities.tower import Tower, BasicTower, RapidTower, SniperTower
-from entities.soldier import Soldier
-from entities.enemy import Enemy, BasicEnemy, FastEnemy, TankEnemy, Boss
-from entities.projectile import Projectile
-from ui.menu import Menu
+from tower import Tower, BasicTower, RapidTower, SniperTower
+from soldier import Soldier
+from enemy import Enemy, BasicEnemy, FastEnemy, TankEnemy, Boss
+from projectile import Projectile
+from menu import Menu
 from maps import get_map_path, get_map_description, get_difficulty_settings
 
 class Game:
