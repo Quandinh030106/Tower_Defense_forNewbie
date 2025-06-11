@@ -5,24 +5,30 @@ import random
 from typing import List, Tuple, Dict, Optional
 
 from constants import *
-from tower import Tower, BasicTower, RapidTower, SniperTower
-from soldier import Soldier
-from enemy import Enemy, BasicEnemy, FastEnemy, TankEnemy
-from projectile import Projectile
-from menu import Menu
+from entities.tower import Tower, BasicTower, RapidTower, SniperTower
+from entities.soldier import Soldier
+from entities.enemy import Enemy, BasicEnemy, FastEnemy, TankEnemy, Boss
+from entities.projectile import Projectile
+from ui.menu import Menu
+from maps import get_map_path, get_map_description, get_difficulty_settings
 
 class Game:
-    def __init__(self):
+    def __init__(self, map_name: str = "Forest", difficulty: str = "Medium"):
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         pygame.display.set_caption("Tower Defense 8-bit")
         self.clock = pygame.time.Clock()
         
+        self.map_name = map_name
+        self.difficulty = difficulty
         self.reset_game()
         
     def reset_game(self):
-        self.gold = 100
+        # Get difficulty settings
+        settings = get_difficulty_settings(self.difficulty)
+        
+        self.gold = settings["starting_gold"]
+        self.lives = settings["starting_lives"]
         self.wave = 1
-        self.lives = 10
         self.game_over = False
         self.wave_in_progress = False
         self.towers: List[Tower] = []
@@ -34,20 +40,18 @@ class Game:
         self.selected_tower = None
         self.selected_unit = None
         self.dragging_unit = None
+        
+        # Get map path
+        self.current_path = get_map_path(self.map_name)
     
     def is_valid_tower_position(self, grid_x: int, grid_y: int) -> bool:
         # Check if position is on a path
-        if (grid_x, grid_y) in PATH:
+        if (grid_x, grid_y) in self.current_path:
             return False
         
         # Check if position is already occupied by a tower
         for tower in self.towers:
             if tower.grid_x == grid_x and tower.grid_y == grid_y:
-                return False
-                
-        # Check if position is already occupied by a soldier
-        for soldier in self.soldiers:
-            if soldier.grid_x == grid_x and soldier.grid_y == grid_y:
                 return False
         
         # Check if position is within game boundaries
@@ -55,7 +59,23 @@ class Game:
             return False
             
         return True
-    
+
+    def is_valid_soldier_position(self, grid_x: int, grid_y: int) -> bool:
+        # Check if position is on a path
+        if (grid_x, grid_y) not in self.current_path:
+            return False
+            
+        # Check if position is already occupied by a soldier
+        for soldier in self.soldiers:
+            if soldier.grid_x == grid_x and soldier.grid_y == grid_y:
+                return False
+                
+        # Check if position is within game boundaries
+        if grid_x < 0 or grid_x >= SCREEN_WIDTH // GRID_SIZE - 5 or grid_y < 0 or grid_y >= SCREEN_HEIGHT // GRID_SIZE:
+            return False
+            
+        return True
+
     def place_tower(self, grid_x: int, grid_y: int) -> bool:
         if not self.is_valid_tower_position(grid_x, grid_y):
             return False
@@ -73,9 +93,11 @@ class Game:
             self.gold -= 75
             return True
         elif self.selected_tower_type == "soldier" and self.gold >= 30:
-            self.soldiers.append(Soldier(grid_x, grid_y))
-            self.gold -= 30
-            return True
+            if self.is_valid_soldier_position(grid_x, grid_y):
+                self.soldiers.append(Soldier(grid_x, grid_y))
+                self.gold -= 30
+                return True
+            return False
             
         return False
     
@@ -85,15 +107,19 @@ class Game:
             self.spawn_enemies()
     
     def spawn_enemies(self):
-        num_enemies = self.wave * 3 + 5
+        settings = get_difficulty_settings(self.difficulty)
+        # Base number of enemies increases by 50% each wave
+        base_num_enemies = int(5 * (1.5 ** (self.wave - 1)))
+        num_enemies = int(base_num_enemies * settings["wave_size_multiplier"])
         
         # Different mix of enemies based on wave number
         num_basic = max(3, num_enemies - self.wave * 2)
         num_fast = min(self.wave, num_enemies // 3)
         num_tank = max(0, min(self.wave // 3, 3))
+        num_boss = self.wave // 10
         
-        # Spawn delay between enemies
-        self.spawn_delay = 60
+        # Spawn delay between enemies (decreases by 10% each wave, minimum 10)
+        self.spawn_delay = max(10, int(30 * (0.9 ** (self.wave - 1))))
         self.spawn_counter = 0
         
         # Prepare enemy queue
@@ -104,7 +130,8 @@ class Game:
             self.enemy_queue.append("fast")
         for _ in range(num_tank):
             self.enemy_queue.append("tank")
-            
+        for _ in range(num_boss):
+            self.enemy_queue.append('boss')
         # Shuffle queue for variety
         random.shuffle(self.enemy_queue)
     
@@ -112,14 +139,27 @@ class Game:
         if not self.enemy_queue:
             return
             
+        settings = get_difficulty_settings(self.difficulty)
         enemy_type = self.enemy_queue.pop(0)
         
         if enemy_type == "basic":
-            self.enemies.append(BasicEnemy(PATH))
+            enemy = BasicEnemy(self.current_path, self)
         elif enemy_type == "fast":
-            self.enemies.append(FastEnemy(PATH))
+            enemy = FastEnemy(self.current_path, self)
         elif enemy_type == "tank":
-            self.enemies.append(TankEnemy(PATH))
+            enemy = TankEnemy(self.current_path, self)
+        elif enemy_type == 'boss':
+            enemy = Boss(self.current_path, self)
+        
+        # Apply difficulty multipliers and wave scaling
+        wave_multiplier = 1.5 ** (self.wave - 1)  # 50% increase per wave
+        enemy.health = int(enemy.health * settings["enemy_health_multiplier"] * wave_multiplier)
+        enemy.max_health = enemy.health
+        enemy.speed *= settings["enemy_speed_multiplier"] * (1 + (wave_multiplier - 1) * 0.3)  # Speed increases by 30% of the health multiplier
+        enemy.reward = int(enemy.reward * settings["enemy_reward_multiplier"] * (1 + (wave_multiplier - 1) * 0.5))  # Reward increases by 50% of the health multiplier
+        enemy.damage = int(enemy.damage * settings["enemy_health_multiplier"] * wave_multiplier)  # Damage scales with health
+        
+        self.enemies.append(enemy)
     
     def update(self):
         # Spawn enemies if wave in progress
@@ -133,7 +173,7 @@ class Game:
         if self.wave_in_progress and not self.enemy_queue and not self.enemies:
             self.wave_in_progress = False
             self.wave += 1
-            self.gold += 30 + (self.wave * 5)  # Gold reward for completing wave
+            self.gold += 30 + (self.wave * 2)  # Gold reward for completing wave
         
         # Update towers
         for tower in self.towers:
@@ -180,15 +220,45 @@ class Game:
                 self.enemies.remove(enemy)
     
     def draw_grid(self):
+        # Set grid color based on map theme
+        if self.map_name == "Forest":
+            grid_color = (0, 100, 0)  # Dark forest green
+        elif self.map_name == "Flame Desert":
+            grid_color = (184, 134, 11)  # Dark goldenrod
+        elif self.map_name == "Ice Kingdom":
+            grid_color = (220, 220, 220)  # Light gray
+        else:
+            grid_color = (50, 50, 50)
+            
         # Draw grid lines
         for x in range(0, SCREEN_WIDTH - 200, GRID_SIZE):
-            pygame.draw.line(self.screen, (50, 50, 50), (x, 0), (x, SCREEN_HEIGHT))
+            pygame.draw.line(self.screen, grid_color, (x, 0), (x, SCREEN_HEIGHT))
         for y in range(0, SCREEN_HEIGHT, GRID_SIZE):
-            pygame.draw.line(self.screen, (50, 50, 50), (0, y), (SCREEN_WIDTH - 200, y))
+            pygame.draw.line(self.screen, grid_color, (0, y), (SCREEN_WIDTH - 200, y))
     
     def draw_path(self):
-        for grid_x, grid_y in PATH:
-            pygame.draw.rect(self.screen, BROWN, (grid_x * GRID_SIZE, grid_y * GRID_SIZE, GRID_SIZE, GRID_SIZE))
+        # Set path color based on map theme
+        if self.map_name == "Forest":
+            path_color = (139, 69, 19)  # Brown dirt path
+        elif self.map_name == "Flame Desert":
+            path_color = (160, 82, 45)  # Sandy path
+        elif self.map_name == "Ice Kingdom":
+            path_color = (169, 169, 169)  # Gray snow path
+        else:
+            path_color = BROWN
+            
+        for grid_x, grid_y in self.current_path:
+            pygame.draw.rect(self.screen, path_color, (grid_x * GRID_SIZE, grid_y * GRID_SIZE, GRID_SIZE, GRID_SIZE))
+    
+    def draw_map_info(self):
+        # Draw game info
+        gold_text = GAME_FONT.render(f"Gold: {self.gold}", True, WHITE)
+        wave_text = GAME_FONT.render(f"Wave: {self.wave}", True, WHITE)
+        lives_text = GAME_FONT.render(f"Lives: {self.lives}", True, WHITE)
+        
+        self.screen.blit(gold_text, (SCREEN_WIDTH - 190, 10))
+        self.screen.blit(wave_text, (SCREEN_WIDTH - 190, 35))
+        self.screen.blit(lives_text, (SCREEN_WIDTH - 190, 60))
     
     def draw_game_over(self):
         overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
@@ -217,14 +287,33 @@ class Game:
         return restart_button
     
     def draw(self):
-        # Draw background
-        self.screen.fill(DARK_GREEN)
+        # Draw background with map-specific theme
+        if self.map_name == "Forest":
+            self.screen.fill((34, 139, 34))  # Forest green
+        elif self.map_name == "Flame Desert":
+            self.screen.fill((210, 180, 140))  # Sandy color
+        elif self.map_name == "Ice Kingdom":
+            self.screen.fill((240, 248, 255))  # Snow white
+        else:
+            self.screen.fill(DARK_GREEN)
         
         # Draw grid
         self.draw_grid()
         
         # Draw path
         self.draw_path()
+        
+        # Draw tower ranges
+        for tower in self.towers:
+            if tower == self.selected_tower:
+                # Draw range circle
+                range_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+                range_radius = tower.range * GRID_SIZE
+                pygame.draw.circle(range_surface, (255, 255, 255, 50), 
+                                 (tower.grid_x * GRID_SIZE + GRID_SIZE // 2, 
+                                  tower.grid_x * GRID_SIZE + GRID_SIZE // 2), 
+                                 range_radius)
+                self.screen.blit(range_surface, (0, 0))
         
         # Draw towers
         for tower in self.towers:
