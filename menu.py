@@ -9,6 +9,7 @@ class Menu:
         self.button_width = 120
         self.button_margin = 10
         self.buttons = {}
+        self.selected_button: Optional[str] = None
         self.create_buttons()
         
     def create_buttons(self):
@@ -66,7 +67,8 @@ class Menu:
     
     def draw_button(self, screen, text, button_id, enabled):
         button = self.buttons[button_id]
-        color = (100, 100, 100) if enabled else (50, 50, 50)
+        is_selected = (self.selected_button == button_id)
+        color = (150, 150, 150) if is_selected else (100, 100, 100) if enabled else (50, 50, 50)
         pygame.draw.rect(screen, color, button)
         pygame.draw.rect(screen, BLACK, button, 2)
         
@@ -78,16 +80,22 @@ class Menu:
         for button_id, button in self.buttons.items():
             if button.collidepoint(pos):
                 if button_id == "basic_tower" and gold >= 50:
+                    self.selected_button = "basic_tower"
                     return "basic_tower", 50
                 elif button_id == "rapid_tower" and gold >= 75:
+                    self.selected_button = "rapid_tower"
                     return "rapid_tower", 75
                 elif button_id == "sniper_tower" and gold >= 100:
+                    self.selected_button = "sniper_tower"
                     return "sniper_tower", 100
                 elif button_id == "soldier" and gold >= 30:
+                    self.selected_button = "soldier"
                     return "soldier", 30
                 elif button_id == "start_wave":
+                    self.selected_button = None
                     return "start_wave", 0
                 elif button_id == "quit":
+                    self.selected_button = None
                     return "quit", 0
                 elif button_id.startswith("map_"):
                     return f"select_map_{button_id[4:]}", 0
