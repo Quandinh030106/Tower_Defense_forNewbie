@@ -339,7 +339,40 @@ class Game:
         restart_button = None
         if self.game_over:
             restart_button = self.draw_game_over()
-            
+
+        # Draw tower preview (when placing a new tower)
+        if self.selected_tower_type:
+            mouse_x, mouse_y = pygame.mouse.get_pos()
+            if mouse_x < SCREEN_WIDTH - 200:
+                grid_x = mouse_x // GRID_SIZE
+                grid_y = mouse_y // GRID_SIZE
+                center_x = grid_x * GRID_SIZE + GRID_SIZE // 2
+                center_y = grid_y * GRID_SIZE + GRID_SIZE // 2
+
+                # Determine tower range (based on type)
+                if self.selected_tower_type == "basic_tower":
+                    range_radius = 120
+                    color = GRAY
+                elif self.selected_tower_type == "sniper_tower":
+                    range_radius = 200
+                    color = GRAY
+                elif self.selected_tower_type == "rapid_tower":
+                    range_radius = 120
+                    color = GRAY
+                else:
+                    range_radius = 0
+                    color = (0, 0, 0)
+
+                # Draw semi-transparent tower
+                s = pygame.Surface((GRID_SIZE, GRID_SIZE), pygame.SRCALPHA)
+                s.fill((*color, 100))  # mờ mờ
+                self.screen.blit(s, (grid_x * GRID_SIZE, grid_y * GRID_SIZE))
+
+                # Draw radius
+                range_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+                pygame.draw.circle(range_surface, (255, 255, 255, 50), (center_x, center_y), range_radius)
+                self.screen.blit(range_surface, (0, 0))
+
         # Update display
         pygame.display.flip()
         
