@@ -4,6 +4,7 @@ from typing import List, Optional, Tuple
 from constants import *
 from projectile import Projectile
 
+
 class Tower:
     def __init__(self, grid_x: int, grid_y: int, damage: int, range_radius: int, fire_rate: float, cost: int):
         self.grid_x = grid_x
@@ -19,6 +20,7 @@ class Tower:
         self.is_dragging = False
         self.drag_offset_x = 0
         self.drag_offset_y = 0
+
     
     def can_fire(self) -> bool:
         return self.cooldown <= 0
@@ -70,14 +72,14 @@ class Tower:
     def draw(self, screen: pygame.Surface, show_range: bool = False):
         # Draw selection indicator
         if self.is_selected:
-            pygame.draw.rect(screen, YELLOW, 
-                           (self.grid_x * GRID_SIZE - 2, self.grid_y * GRID_SIZE - 2, 
+            pygame.draw.rect(screen, YELLOW,
+                           (self.grid_x * GRID_SIZE - 2, self.grid_y * GRID_SIZE - 2,
                             GRID_SIZE + 4, GRID_SIZE + 4), 2)
-        
+
         # Draw range circle if selected
         if show_range or self.is_selected:
             pygame.draw.circle(screen, (255, 255, 255, 100), (int(self.x), int(self.y)), self.range, 1)
-        
+
         # Draw tower body
         if self.is_dragging:
             # Draw semi-transparent tower while dragging
@@ -92,75 +94,218 @@ class Tower:
 class BasicTower(Tower):
     def __init__(self, grid_x: int, grid_y: int):
         super().__init__(grid_x, grid_y, damage=10, range_radius=120, fire_rate=30, cost=50)
-    
+        self.animation_timer = 0
+        self.is_animating = False
+        # Load sprite sheet mới
+        self.sprite_sheet = pygame.image.load("assets/tower/basic_tower.png").convert_alpha()
+        self.frame_width = 128  # Chiều rộng mỗi frame
+        self.frame_height = 128  # Chiều cao mỗi frame
+        self.frames = []
+        self.current_frame = 0
+        # Cắt sprite sheet thành 8 frame và scale về GRID_SIZE
+        scale_factor = 1.0  # Hoặc 1.5 nếu muốn lớn hơn 1 ô
+        for i in range(8):
+            frame = self.sprite_sheet.subsurface(
+                pygame.Rect(i * self.frame_width, 0, self.frame_width, self.frame_height))
+            self.frames.append(
+                pygame.transform.scale(frame, (int(GRID_SIZE * scale_factor), int(GRID_SIZE * scale_factor))))
+        self.angle = 0
+        self.cannon_length = 15 * scale_factor  # Điều chỉnh độ dài nòng
+        self.cannon_offset_x = 0
+        self.cannon_offset_y = -int(GRID_SIZE * scale_factor * 0.5)
+
     def draw(self, screen: pygame.Surface, show_range: bool = False):
-        # Draw range circle if selected
+        if self.is_selected:
+            pygame.draw.rect(screen, YELLOW,
+                            (self.grid_x * GRID_SIZE - 2,
+                             self.grid_y * GRID_SIZE - 2,
+                             GRID_SIZE + 4, GRID_SIZE + 4), 2)
         if show_range or self.is_selected:
             pygame.draw.circle(screen, (255, 255, 255, 100), (int(self.x), int(self.y)), self.range, 1)
-        
-        # Draw tower body
         if self.is_dragging:
-            # Draw semi-transparent tower while dragging
             s = pygame.Surface((GRID_SIZE, GRID_SIZE), pygame.SRCALPHA)
             s.fill((128, 128, 128, 128))
-            screen.blit(s, (self.x - GRID_SIZE//2, self.y - GRID_SIZE//2))
+            screen.blit(s, (self.x - GRID_SIZE // 2, self.y - GRID_SIZE // 2))
         else:
-            pygame.draw.rect(screen, GRAY, (self.grid_x * GRID_SIZE, self.grid_y * GRID_SIZE, GRID_SIZE, GRID_SIZE))
-            
-            # Draw tower cannon
-            pygame.draw.rect(screen, BLUE, (self.x - 5, self.y - 15, 10, 30))
-            
-            # Draw tower base outline
-            pygame.draw.rect(screen, BLACK, (self.grid_x * GRID_SIZE, self.grid_y * GRID_SIZE, GRID_SIZE, GRID_SIZE), 2)
+            if self.frames:
+                frame_to_draw = self.current_frame if self.is_animating else 0
+                original_frame = self.frames[frame_to_draw]
+                rotated_frame = pygame.transform.rotate(original_frame, -self.angle)
+                new_rect = rotated_frame.get_rect(center=(self.grid_x * GRID_SIZE + GRID_SIZE // 2,
+                                                         self.grid_y * GRID_SIZE + GRID_SIZE // 2))
+                screen.blit(rotated_frame, new_rect.topleft)
 
+    def update_angle(self, target: 'Enemy'):
+        if target:
+            cannon_x = self.x + self.cannon_offset_x
+            cannon_y = self.y + self.cannon_offset_y
+            dx = target.x - cannon_x
+            dy = target.y - cannon_y
+            self.angle = math.degrees(math.atan2(dy, dx))
 
+    def fire(self, target: 'Enemy') -> Projectile:
+        self.is_animating = True
+        self.animation_timer = len(self.frames) * 5
+        self.current_frame = 0
+        dx = target.x - self.x
+        dy = target.y - self.y
+        self.angle = math.degrees(math.atan2(dy, dx))
+        cannon_x = self.x + self.cannon_offset_x + math.cos(math.radians(self.angle)) * self.cannon_length
+        cannon_y = self.y + self.cannon_offset_y + math.sin(math.radians(self.angle)) * self.cannon_length
+        return Projectile(cannon_x, cannon_y, target, self.damage, 5, YELLOW)
+
+    def update_cooldown(self):
+        if self.cooldown > 0:
+            self.cooldown -= 1
+        if self.is_animating:
+            self.animation_timer -= 1
+            if self.animation_timer <= 0:
+                self.is_animating = False
+            else:
+                self.current_frame = (len(self.frames) - 1) - (self.animation_timer // 5)
 class RapidTower(Tower):
     def __init__(self, grid_x: int, grid_y: int):
         super().__init__(grid_x, grid_y, damage=10, range_radius=120, fire_rate=15, cost=75)
-    
+        self.animation_timer = 0
+        self.is_animating = False
+        # Load sprite sheet mới
+        self.sprite_sheet = pygame.image.load("assets/tower/rapid_tower.png").convert_alpha()
+        self.frame_width = 128
+        self.frame_height = 128
+        self.frames = []
+        self.current_frame = 0
+        scale_factor = 1.0
+        for i in range(8):
+            frame = self.sprite_sheet.subsurface(
+                pygame.Rect(i * self.frame_width, 0, self.frame_width, self.frame_height))
+            self.frames.append(
+                pygame.transform.scale(frame, (int(GRID_SIZE * scale_factor), int(GRID_SIZE * scale_factor))))
+        self.angle = 0
+        self.cannon_length = 15 * scale_factor
+        self.cannon_offset_x = 0
+        self.cannon_offset_y = -int(GRID_SIZE * scale_factor * 0.5)
+
     def draw(self, screen: pygame.Surface, show_range: bool = False):
-        # Draw range circle if selected
         if show_range or self.is_selected:
             pygame.draw.circle(screen, (255, 255, 255, 100), (int(self.x), int(self.y)), self.range, 1)
-        
-        # Draw tower body
         if self.is_dragging:
-            # Draw semi-transparent tower while dragging
             s = pygame.Surface((GRID_SIZE, GRID_SIZE), pygame.SRCALPHA)
             s.fill((128, 128, 128, 128))
-            screen.blit(s, (self.x - GRID_SIZE//2, self.y - GRID_SIZE//2))
+            screen.blit(s, (self.x - GRID_SIZE // 2, self.y - GRID_SIZE // 2))
         else:
-            pygame.draw.rect(screen, GRAY, (self.grid_x * GRID_SIZE, self.grid_y * GRID_SIZE, GRID_SIZE, GRID_SIZE))
-            
-            # Draw tower cannon
-            pygame.draw.rect(screen, ORANGE, (self.x - 5, self.y - 15, 10, 30))
-            
-            # Draw tower base outline
-            pygame.draw.rect(screen, BLACK, (self.grid_x * GRID_SIZE, self.grid_y * GRID_SIZE, GRID_SIZE, GRID_SIZE), 2)
+            if self.frames:
+                frame_to_draw = self.current_frame if self.is_animating else 0
+                original_frame = self.frames[frame_to_draw]
+                rotated_frame = pygame.transform.rotate(original_frame, -self.angle)
+                new_rect = rotated_frame.get_rect(center=(self.grid_x * GRID_SIZE + GRID_SIZE // 2,
+                                                         self.grid_y * GRID_SIZE + GRID_SIZE // 2))
+                screen.blit(rotated_frame, new_rect.topleft)
+        if self.is_selected:
+            pygame.draw.rect(screen, YELLOW,
+                            (self.grid_x * GRID_SIZE - 2,
+                             self.grid_y * GRID_SIZE - 2,
+                             GRID_SIZE + 4, GRID_SIZE + 4), 2)
 
+    def update_angle(self, target: 'Enemy'):
+        if target:
+            cannon_x = self.x + self.cannon_offset_x
+            cannon_y = self.y + self.cannon_offset_y
+            dx = target.x - cannon_x
+            dy = target.y - cannon_y
+            self.angle = math.degrees(math.atan2(dy, dx))
+
+    def fire(self, target: 'Enemy') -> Projectile:
+        self.is_animating = True
+        self.animation_timer = len(self.frames) * 5
+        self.current_frame = 0
+        dx = target.x - self.x
+        dy = target.y - self.y
+        self.angle = math.degrees(math.atan2(dy, dx))
+        cannon_x = self.x + self.cannon_offset_x + math.cos(math.radians(self.angle)) * self.cannon_length
+        cannon_y = self.y + self.cannon_offset_y + math.sin(math.radians(self.angle)) * self.cannon_length
+        return Projectile(cannon_x, cannon_y, target, self.damage, 5, YELLOW)
+
+    def update_cooldown(self):
+        if self.cooldown > 0:
+            self.cooldown -= 1
+        if self.is_animating:
+            self.animation_timer -= 1
+            if self.animation_timer <= 0:
+                self.is_animating = False
+            else:
+                self.current_frame = (len(self.frames) - 1) - (self.animation_timer // 5)
 
 class SniperTower(Tower):
     def __init__(self, grid_x: int, grid_y: int):
         super().__init__(grid_x, grid_y, damage=30, range_radius=200, fire_rate=60, cost=100)
-    
+        self.animation_timer = 0
+        self.is_animating = False
+        # Load sprite sheet mới
+        self.sprite_sheet = pygame.image.load("assets/tower/sniper_tower.png").convert_alpha()
+        self.frame_width = 128
+        self.frame_height = 128
+        self.frames = []
+        self.current_frame = 0
+        scale_factor = 1.0
+        for i in range(8):
+            frame = self.sprite_sheet.subsurface(
+                pygame.Rect(i * self.frame_width, 0, self.frame_width, self.frame_height))
+            self.frames.append(
+                pygame.transform.scale(frame, (int(GRID_SIZE * scale_factor), int(GRID_SIZE * scale_factor))))
+        self.angle = 0
+        self.cannon_length = 20 * scale_factor  # Điều chỉnh độ dài nòng
+        self.cannon_offset_x = 0
+        self.cannon_offset_y = -int(GRID_SIZE * scale_factor * 0.5)
+
     def draw(self, screen: pygame.Surface, show_range: bool = False):
         if show_range or self.is_selected:
             pygame.draw.circle(screen, (255, 255, 255, 100), (int(self.x), int(self.y)), self.range, 1)
-        
-        # Draw tower body
         if self.is_dragging:
-            # Draw semi-transparent tower while dragging
             s = pygame.Surface((GRID_SIZE, GRID_SIZE), pygame.SRCALPHA)
             s.fill((128, 128, 128, 128))
-            screen.blit(s, (self.x - GRID_SIZE//2, self.y - GRID_SIZE//2))
+            screen.blit(s, (self.x - GRID_SIZE // 2, self.y - GRID_SIZE // 2))
         else:
-            pygame.draw.rect(screen, GRAY, (self.grid_x * GRID_SIZE, self.grid_y * GRID_SIZE, GRID_SIZE, GRID_SIZE))
-            
-            # Draw tower cannon (sniper)
-            pygame.draw.rect(screen, RED, (self.x - 3, self.y - 20, 6, 40))
-            
-            # Draw tower base outline
-            pygame.draw.rect(screen, BLACK, (self.grid_x * GRID_SIZE, self.grid_y * GRID_SIZE, GRID_SIZE, GRID_SIZE), 2) 
+            if self.frames:
+                frame_to_draw = self.current_frame if self.is_animating else 0
+                original_frame = self.frames[frame_to_draw]
+                rotated_frame = pygame.transform.rotate(original_frame, -self.angle)
+                new_rect = rotated_frame.get_rect(center=(self.grid_x * GRID_SIZE + GRID_SIZE // 2,
+                                                         self.grid_y * GRID_SIZE + GRID_SIZE // 2))
+                screen.blit(rotated_frame, new_rect.topleft)
+        if self.is_selected:
+            pygame.draw.rect(screen, YELLOW,
+                            (self.grid_x * GRID_SIZE - 2,
+                             self.grid_y * GRID_SIZE - 2,
+                             GRID_SIZE + 4, GRID_SIZE + 4), 2)
+
+    def update_angle(self, target: 'Enemy'):
+        if target:
+            cannon_x = self.x + self.cannon_offset_x
+            cannon_y = self.y + self.cannon_offset_y
+            dx = target.x - cannon_x
+            dy = target.y - cannon_y
+            self.angle = math.degrees(math.atan2(dy, dx))
+
+    def fire(self, target: 'Enemy') -> Projectile:
+        self.is_animating = True
+        self.animation_timer = len(self.frames) * 5
+        self.current_frame = 0
+        dx = target.x - self.x
+        dy = target.y - self.y
+        self.angle = math.degrees(math.atan2(dy, dx))
+        cannon_x = self.x + self.cannon_offset_x + math.cos(math.radians(self.angle)) * self.cannon_length
+        cannon_y = self.y + self.cannon_offset_y + math.sin(math.radians(self.angle)) * self.cannon_length
+        return Projectile(cannon_x, cannon_y, target, self.damage, 5, YELLOW)
+
+    def update_cooldown(self):
+        if self.cooldown > 0:
+            self.cooldown -= 1
+        if self.is_animating:
+            self.animation_timer -= 1
+            if self.animation_timer <= 0:
+                self.is_animating = False
+            else:
+                self.current_frame = (len(self.frames) - 1) - (self.animation_timer // 5)
 
 class MagicTower(Tower):
     def __init__(self, grid_x:int, grid_y: int):
