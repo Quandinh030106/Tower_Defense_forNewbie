@@ -306,15 +306,13 @@ class Game:
         # Draw tower ranges
         for tower in self.towers:
             if tower == self.selected_tower:
-                # Draw range circle
-                range_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
-                range_radius = tower.range * GRID_SIZE
-                pygame.draw.circle(range_surface, (255, 255, 255, 50), 
-                                 (tower.grid_x * GRID_SIZE + GRID_SIZE // 2, 
-                                  tower.grid_x * GRID_SIZE + GRID_SIZE // 2), 
-                                 range_radius)
-                self.screen.blit(range_surface, (0, 0))
-        
+                center_x = tower.grid_x * GRID_SIZE + GRID_SIZE // 2
+                center_y = tower.grid_y * GRID_SIZE + GRID_SIZE // 2
+                radius = tower.range
+
+
+                pygame.draw.circle(self.screen, (255, 255, 255), (center_x, center_y), radius, width=1)
+
         # Draw towers
         for tower in self.towers:
             tower.draw(self.screen, tower == self.selected_tower)
@@ -332,7 +330,7 @@ class Game:
             projectile.draw(self.screen)
         
         # Draw menu
-        self.menu.draw(self.screen, self.gold, self.wave, self.lives, self.dragging_enabled)
+        self.menu.draw(self.screen, self.gold, self.wave, self.lives, self.dragging_enabled, can_sell=bool(self.selected_tower))
 
         
         # Draw game over screen
@@ -369,9 +367,9 @@ class Game:
                 self.screen.blit(s, (grid_x * GRID_SIZE, grid_y * GRID_SIZE))
 
                 # Draw radius
-                range_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
-                pygame.draw.circle(range_surface, (255, 255, 255, 50), (center_x, center_y), range_radius)
-                self.screen.blit(range_surface, (0, 0))
+                radius_surface = pygame.Surface((range_radius * 2, range_radius * 2), pygame.SRCALPHA)
+                pygame.draw.circle(radius_surface, (255, 255, 255, 50), (range_radius, range_radius), range_radius)
+                self.screen.blit(radius_surface, (center_x - range_radius, center_y - range_radius))
 
         # Update display
         pygame.display.flip()

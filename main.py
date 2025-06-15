@@ -76,6 +76,13 @@ def main():
                                     current_game.start_wave()
                                 elif tower_type == "toggle_drag":
                                     current_game.dragging_enabled = not current_game.dragging_enabled
+                                elif tower_type == "sell" and current_game.selected_tower:
+                                    tower = current_game.selected_tower
+                                    refund = tower.cost // 2
+                                    current_game.gold += refund
+                                    current_game.towers.remove(tower)
+                                    current_game.selected_tower = None
+                                    current_game.selected_unit = None
                                 else:
                                     current_game.selected_tower_type = tower_type
                                     current_game.selected_tower = None
@@ -89,6 +96,7 @@ def main():
                                     if current_game.selected_tower_type:
                                         if current_game.place_tower(grid_x, grid_y):
                                             current_game.selected_tower_type = None
+                                            current_game.menu.selected_button = None
                                     elif current_game.dragging_unit is None:
                                         clicked_on_unit = False
                                         for tower in current_game.towers:
@@ -97,13 +105,22 @@ def main():
                                                     current_game.selected_unit.is_selected = False
                                                 tower.is_selected = True
                                                 current_game.selected_unit = tower
+
                                                 if current_game.dragging_enabled:
+                                                    current_game.selected_tower = None  # ❌ Không hiển thị radius trong lúc drag
                                                     tower.start_drag(x, y)
                                                     current_game.dragging_unit = tower
+                                                else:
+                                                    current_game.selected_tower = tower  # ✅ Chỉ chọn khi không drag
+
                                                 clicked_on_unit = True
                                                 break
                                         
                                         if not clicked_on_unit:
+                                            if current_game.selected_unit:
+                                                current_game.selected_unit.is_selected = False
+                                            current_game.selected_unit = None
+                                            current_game.selected_tower = None
                                             for soldier in current_game.soldiers:
                                                 if soldier.grid_x == grid_x and soldier.grid_y == grid_y:
                                                     if current_game.selected_unit:

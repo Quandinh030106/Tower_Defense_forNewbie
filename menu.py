@@ -27,6 +27,10 @@ class Menu:
         y += self.button_height + self.button_margin
         self.buttons["toggle_drag"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 10, y, self.button_width,self.button_height)
 
+        #sell button
+        y += self.button_height + self.button_margin
+        self.buttons["sell"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 10, y, self.button_width,self.button_height)
+
         # Game control buttons
         y += self.button_height + self.button_margin * 2
         self.buttons["start_wave"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 10, y, self.button_width, self.button_height)
@@ -45,7 +49,7 @@ class Menu:
             self.buttons[f"diff_{difficulty}"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 10, y, self.button_width, self.button_height)
             y += self.button_height + self.button_margin
     
-    def draw(self, screen, gold, wave, lives,dragging_enabled):
+    def draw(self, screen, gold, wave, lives, dragging_enabled, can_sell=False):
         # Draw background
         pygame.draw.rect(screen, (50, 50, 50), (SCREEN_WIDTH - 200, 0, 200, SCREEN_HEIGHT))
         
@@ -65,6 +69,8 @@ class Menu:
         self.draw_button(screen, "Soldier (30g)", "soldier", gold >= 30)
         #draw dragging button
         self.draw_button(screen, "Dragging: " + ("ON" if dragging_enabled else "OFF"), "toggle_drag", True)
+        #draw sell button
+        self.draw_button(screen,"Sell Tower","sell",can_sell)
         # Draw game control buttons
         self.draw_button(screen, "Start Wave", "start_wave", True)
         self.draw_button(screen, "Quit", "quit", True)
@@ -99,6 +105,9 @@ class Menu:
                 elif button_id == "toggle_drag":
                     self.selected_button = None
                     return "toggle_drag", 0
+                elif button_id == "sell":
+                    self.selected_button = None
+                    return "sell", 0
                 elif button_id == "start_wave":
                     self.selected_button = None
                     return "start_wave", 0
