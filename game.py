@@ -40,7 +40,7 @@ class Game:
         self.selected_tower = None
         self.selected_unit = None
         self.dragging_unit = None
-        
+        self.dragging_enabled = False
         # Get map path
         self.current_path = get_map_path(self.map_name)
     
@@ -332,7 +332,8 @@ class Game:
             projectile.draw(self.screen)
         
         # Draw menu
-        self.menu.draw(self.screen, self.gold, self.wave, self.lives)
+        self.menu.draw(self.screen, self.gold, self.wave, self.lives, self.dragging_enabled)
+
         
         # Draw game over screen
         restart_button = None

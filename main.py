@@ -74,6 +74,8 @@ def main():
                                     current_game = None
                                 elif tower_type == "start_wave":
                                     current_game.start_wave()
+                                elif tower_type == "toggle_drag":
+                                    current_game.dragging_enabled = not current_game.dragging_enabled
                                 else:
                                     current_game.selected_tower_type = tower_type
                                     current_game.selected_tower = None
@@ -95,8 +97,9 @@ def main():
                                                     current_game.selected_unit.is_selected = False
                                                 tower.is_selected = True
                                                 current_game.selected_unit = tower
-                                                tower.start_drag(x, y)
-                                                current_game.dragging_unit = tower
+                                                if current_game.dragging_enabled:
+                                                    tower.start_drag(x, y)
+                                                    current_game.dragging_unit = tower
                                                 clicked_on_unit = True
                                                 break
                                         
