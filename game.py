@@ -177,7 +177,7 @@ class Game:
         
         # Update towers
         for tower in self.towers:
-            tower.update_cooldown()
+            tower.update_cooldown(self.enemies)
             if tower.can_fire():
                 target = tower.find_target(self.enemies)
                 if target:

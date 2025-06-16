@@ -130,9 +130,9 @@ class BasicTower(Tower):
             if self.frames:
                 frame_to_draw = self.current_frame if self.is_animating else 0
                 original_frame = self.frames[frame_to_draw]
-                rotated_frame = pygame.transform.rotate(original_frame, -self.angle)
-                new_rect = rotated_frame.get_rect(center=(self.grid_x * GRID_SIZE + GRID_SIZE // 2,
-                                                         self.grid_y * GRID_SIZE + GRID_SIZE // 2))
+                rotated_frame = pygame.transform.rotate(original_frame, -(self.angle+90))
+                new_rect = rotated_frame.get_rect(center=(self.x, self.y))
+
                 screen.blit(rotated_frame, new_rect.topleft)
 
     def update_angle(self, target: 'Enemy'):
@@ -154,15 +154,24 @@ class BasicTower(Tower):
         cannon_y = self.y + self.cannon_offset_y + math.sin(math.radians(self.angle)) * self.cannon_length
         return Projectile(cannon_x, cannon_y, target, self.damage, 5, YELLOW)
 
-    def update_cooldown(self):
+    def update_cooldown(self,enemies):
+
         if self.cooldown > 0:
             self.cooldown -= 1
+
+        target = self.find_target(enemies)
+        if target:
+            dx = target.x - self.x
+            dy = target.y - self.y
+            self.angle = math.degrees(math.atan2(dy, dx))
+
         if self.is_animating:
             self.animation_timer -= 1
             if self.animation_timer <= 0:
                 self.is_animating = False
             else:
                 self.current_frame = (len(self.frames) - 1) - (self.animation_timer // 5)
+
 class RapidTower(Tower):
     def __init__(self, grid_x: int, grid_y: int):
         super().__init__(grid_x, grid_y, damage=10, range_radius=120, fire_rate=15, cost=75)
@@ -196,9 +205,8 @@ class RapidTower(Tower):
             if self.frames:
                 frame_to_draw = self.current_frame if self.is_animating else 0
                 original_frame = self.frames[frame_to_draw]
-                rotated_frame = pygame.transform.rotate(original_frame, -self.angle)
-                new_rect = rotated_frame.get_rect(center=(self.grid_x * GRID_SIZE + GRID_SIZE // 2,
-                                                         self.grid_y * GRID_SIZE + GRID_SIZE // 2))
+                rotated_frame = pygame.transform.rotate(original_frame, -(self.angle+90))
+                new_rect = rotated_frame.get_rect(center=(self.x, self.y))
                 screen.blit(rotated_frame, new_rect.topleft)
         if self.is_selected:
             pygame.draw.rect(screen, YELLOW,
@@ -225,9 +233,14 @@ class RapidTower(Tower):
         cannon_y = self.y + self.cannon_offset_y + math.sin(math.radians(self.angle)) * self.cannon_length
         return Projectile(cannon_x, cannon_y, target, self.damage, 5, YELLOW)
 
-    def update_cooldown(self):
+    def update_cooldown(self,enemies):
         if self.cooldown > 0:
             self.cooldown -= 1
+        target = self.find_target(enemies)
+        if target:
+            dx = target.x - self.x
+            dy = target.y - self.y
+            self.angle = math.degrees(math.atan2(dy, dx))
         if self.is_animating:
             self.animation_timer -= 1
             if self.animation_timer <= 0:
@@ -268,9 +281,9 @@ class SniperTower(Tower):
             if self.frames:
                 frame_to_draw = self.current_frame if self.is_animating else 0
                 original_frame = self.frames[frame_to_draw]
-                rotated_frame = pygame.transform.rotate(original_frame, -self.angle)
-                new_rect = rotated_frame.get_rect(center=(self.grid_x * GRID_SIZE + GRID_SIZE // 2,
-                                                         self.grid_y * GRID_SIZE + GRID_SIZE // 2))
+                rotated_frame = pygame.transform.rotate(original_frame, -(self.angle+90))
+                new_rect = rotated_frame.get_rect(center=(self.x, self.y)
+)
                 screen.blit(rotated_frame, new_rect.topleft)
         if self.is_selected:
             pygame.draw.rect(screen, YELLOW,
@@ -297,9 +310,14 @@ class SniperTower(Tower):
         cannon_y = self.y + self.cannon_offset_y + math.sin(math.radians(self.angle)) * self.cannon_length
         return Projectile(cannon_x, cannon_y, target, self.damage, 5, YELLOW)
 
-    def update_cooldown(self):
+    def update_cooldown(self,enemies):
         if self.cooldown > 0:
             self.cooldown -= 1
+        target = self.find_target(enemies)
+        if target:
+            dx = target.x - self.x
+            dy = target.y - self.y
+            self.angle = math.degrees(math.atan2(dy, dx))
         if self.is_animating:
             self.animation_timer -= 1
             if self.animation_timer <= 0:
