@@ -103,7 +103,7 @@ class BasicTower(Tower):
         self.frames = []
         self.current_frame = 0
         # Cắt sprite sheet thành 8 frame và scale về GRID_SIZE
-        scale_factor = 1.0  # Hoặc 1.5 nếu muốn lớn hơn 1 ô
+        scale_factor = 2.0  # Hoặc 1.5 nếu muốn lớn hơn 1 ô
         for i in range(8):
             frame = self.sprite_sheet.subsurface(
                 pygame.Rect(i * self.frame_width, 0, self.frame_width, self.frame_height))
@@ -183,7 +183,7 @@ class RapidTower(Tower):
         self.frame_height = 128
         self.frames = []
         self.current_frame = 0
-        scale_factor = 1.0
+        scale_factor = 2.0
         for i in range(8):
             frame = self.sprite_sheet.subsurface(
                 pygame.Rect(i * self.frame_width, 0, self.frame_width, self.frame_height))
@@ -259,7 +259,7 @@ class SniperTower(Tower):
         self.frame_height = 128
         self.frames = []
         self.current_frame = 0
-        scale_factor = 1.0
+        scale_factor = 2.0
         for i in range(8):
             frame = self.sprite_sheet.subsurface(
                 pygame.Rect(i * self.frame_width, 0, self.frame_width, self.frame_height))

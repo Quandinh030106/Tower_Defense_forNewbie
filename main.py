@@ -107,11 +107,11 @@ def main():
                                                 current_game.selected_unit = tower
 
                                                 if current_game.dragging_enabled:
-                                                    current_game.selected_tower = None  # ❌ Không hiển thị radius trong lúc drag
+                                                    current_game.selected_tower = None
                                                     tower.start_drag(x, y)
                                                     current_game.dragging_unit = tower
                                                 else:
-                                                    current_game.selected_tower = tower  # ✅ Chỉ chọn khi không drag
+                                                    current_game.selected_tower = tower
 
                                                 clicked_on_unit = True
                                                 break
