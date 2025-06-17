@@ -11,7 +11,7 @@ class Menu:
         self.buttons = {}
         self.selected_button: Optional[str] = None
         self.create_buttons()
-        
+
     def create_buttons(self):
         # Tower buttons
         y = 100
@@ -31,37 +31,41 @@ class Menu:
         y += self.button_height + self.button_margin
         self.buttons["sell"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 10, y, self.button_width,self.button_height)
 
-        # Game control buttons
-        y += self.button_height + self.button_margin * 2
-        self.buttons["start_wave"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 10, y, self.button_width, self.button_height)
+        # upgrade button
         y += self.button_height + self.button_margin
-        self.buttons["quit"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 10, y, self.button_width, self.button_height)
-        
+        self.buttons["upgrade"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 10, y, self.button_width,self.button_height)
+
+
         # Map selection buttons
         y += self.button_height + self.button_margin * 2
         for map_name in MAPS.keys():
             self.buttons[f"map_{map_name}"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 10, y, self.button_width, self.button_height)
             y += self.button_height + self.button_margin
-            
+
         # Difficulty selection buttons
         y += self.button_margin
         for difficulty in DIFFICULTY_SETTINGS.keys():
             self.buttons[f"diff_{difficulty}"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 10, y, self.button_width, self.button_height)
             y += self.button_height + self.button_margin
-    
+
+        # game control button
+        bottom_margin = 20
+        self.buttons["quit"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 10,SCREEN_HEIGHT - self.button_height - bottom_margin,self.button_width,self.button_height)
+        self.buttons["start_wave"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 10,SCREEN_HEIGHT - self.button_height * 2 - bottom_margin - self.button_margin,self.button_width,self.button_height)
+
     def draw(self, screen, gold, wave, lives, dragging_enabled, can_sell=False):
         # Draw background
         pygame.draw.rect(screen, (50, 50, 50), (SCREEN_WIDTH - 200, 0, 200, SCREEN_HEIGHT))
-        
+
         # Draw game info
         gold_text = GAME_FONT.render(f"Gold: {gold}", True, WHITE)
         wave_text = GAME_FONT.render(f"Wave: {wave}", True, WHITE)
         lives_text = GAME_FONT.render(f"Lives: {lives}", True, WHITE)
-        
+
         screen.blit(gold_text, (SCREEN_WIDTH - 190, 10))
         screen.blit(wave_text, (SCREEN_WIDTH - 190, 35))
         screen.blit(lives_text, (SCREEN_WIDTH - 190, 60))
-        
+
         # Draw tower buttons
         self.draw_button(screen, "Basic Tower (50g)", "basic_tower", gold >= 50)
         self.draw_button(screen, "Rapid Tower (75g)", "rapid_tower", gold >= 75)
@@ -71,22 +75,24 @@ class Menu:
         self.draw_button(screen, "Dragging: " + ("ON" if dragging_enabled else "OFF"), "toggle_drag", True)
         #draw sell button
         self.draw_button(screen,"Sell Tower","sell",can_sell)
+        #draw upgrade button
+        self.draw_button(screen, "Upgrade", "upgrade", can_sell)
         # Draw game control buttons
         self.draw_button(screen, "Start Wave", "start_wave", True)
         self.draw_button(screen, "Quit", "quit", True)
-        
-    
+
+
     def draw_button(self, screen, text, button_id, enabled):
         button = self.buttons[button_id]
         is_selected = (self.selected_button == button_id)
         color = (150, 150, 150) if is_selected else (100, 100, 100) if enabled else (50, 50, 50)
         pygame.draw.rect(screen, color, button)
         pygame.draw.rect(screen, BLACK, button, 2)
-        
+
         text_surface = GAME_FONT.render(text, True, WHITE if enabled else (100, 100, 100))
         text_rect = text_surface.get_rect(center=button.center)
         screen.blit(text_surface, text_rect)
-    
+
     def handle_click(self, pos, gold):
         for button_id, button in self.buttons.items():
             if button.collidepoint(pos):
@@ -108,6 +114,9 @@ class Menu:
                 elif button_id == "sell":
                     self.selected_button = None
                     return "sell", 0
+                elif button_id == "upgrade":
+                    self.selected_button = None
+                    return "upgrade", 0
                 elif button_id == "start_wave":
                     self.selected_button = None
                     return "start_wave", 0

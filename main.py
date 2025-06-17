@@ -83,6 +83,12 @@ def main():
                                     current_game.towers.remove(tower)
                                     current_game.selected_tower = None
                                     current_game.selected_unit = None
+                                elif tower_type == "upgrade" and current_game.selected_tower:
+                                    upgrade_cost = 50  # hoặc tính dựa trên level
+                                    if current_game.gold >= upgrade_cost:
+                                        current_game.gold -= upgrade_cost
+                                        current_game.selected_tower.upgrade()  # bạn phải cài sẵn hàm này trong tower
+
                                 else:
                                     current_game.selected_tower_type = tower_type
                                     current_game.selected_tower = None
@@ -184,7 +190,6 @@ def main():
             if not current_game.game_over:
                 current_game.update()
             current_game.draw()
-        
         # Update display
         pygame.display.flip()
         

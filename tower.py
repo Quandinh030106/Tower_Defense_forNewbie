@@ -20,8 +20,14 @@ class Tower:
         self.is_dragging = False
         self.drag_offset_x = 0
         self.drag_offset_y = 0
+        self.level = 1
 
-    
+    def upgrade(self):
+        self.level += 1
+        self.damage = int(self.damage * 1.5)
+        self.range += 10
+        self.fire_rate = max(5, self.fire_rate - 3)  # giảm thời gian hồi, min = 5
+
     def can_fire(self) -> bool:
         return self.cooldown <= 0
 
@@ -103,14 +109,14 @@ class BasicTower(Tower):
         self.frames = []
         self.current_frame = 0
         # Cắt sprite sheet thành 8 frame và scale về GRID_SIZE
-        scale_factor = 2.0  # Hoặc 1.5 nếu muốn lớn hơn 1 ô
+        scale_factor = 1.8  # Hoặc 1.5 nếu muốn lớn hơn 1 ô
         for i in range(8):
             frame = self.sprite_sheet.subsurface(
                 pygame.Rect(i * self.frame_width, 0, self.frame_width, self.frame_height))
             self.frames.append(
                 pygame.transform.scale(frame, (int(GRID_SIZE * scale_factor), int(GRID_SIZE * scale_factor))))
         self.angle = 0
-        self.cannon_length = 15 * scale_factor  # Điều chỉnh độ dài nòng
+        self.cannon_length = 16 * scale_factor  # Điều chỉnh độ dài nòng
         self.cannon_offset_x = 0
         self.cannon_offset_y = -int(GRID_SIZE * scale_factor * 0.5)
 
@@ -147,11 +153,18 @@ class BasicTower(Tower):
         self.is_animating = True
         self.animation_timer = len(self.frames) * 5
         self.current_frame = 0
+
         dx = target.x - self.x
         dy = target.y - self.y
         self.angle = math.degrees(math.atan2(dy, dx))
-        cannon_x = self.x + self.cannon_offset_x + math.cos(math.radians(self.angle)) * self.cannon_length
-        cannon_y = self.y + self.cannon_offset_y + math.sin(math.radians(self.angle)) * self.cannon_length
+
+        # 🔧 Offset thủ công để khớp đầu nòng
+        manual_offset_x =-4
+        manual_offset_y = 80
+
+        cannon_x = self.x + self.cannon_offset_x + math.cos(math.radians(self.angle)) * self.cannon_length + manual_offset_x
+        cannon_y = self.y + self.cannon_offset_y + math.sin(math.radians(self.angle)) * self.cannon_length + manual_offset_y
+
         return Projectile(cannon_x, cannon_y, target, self.damage, 5, YELLOW)
 
     def update_cooldown(self,enemies):
@@ -183,7 +196,7 @@ class RapidTower(Tower):
         self.frame_height = 128
         self.frames = []
         self.current_frame = 0
-        scale_factor = 2.0
+        scale_factor = 1.8
         for i in range(8):
             frame = self.sprite_sheet.subsurface(
                 pygame.Rect(i * self.frame_width, 0, self.frame_width, self.frame_height))
@@ -226,11 +239,17 @@ class RapidTower(Tower):
         self.is_animating = True
         self.animation_timer = len(self.frames) * 5
         self.current_frame = 0
+
         dx = target.x - self.x
         dy = target.y - self.y
         self.angle = math.degrees(math.atan2(dy, dx))
-        cannon_x = self.x + self.cannon_offset_x + math.cos(math.radians(self.angle)) * self.cannon_length
-        cannon_y = self.y + self.cannon_offset_y + math.sin(math.radians(self.angle)) * self.cannon_length
+
+        manual_offset_x = -2
+        manual_offset_y = 100
+
+        cannon_x = self.x + self.cannon_offset_x + math.cos(math.radians(self.angle)) * self.cannon_length + manual_offset_x
+        cannon_y = self.y + self.cannon_offset_y + math.sin(math.radians(self.angle)) * self.cannon_length + manual_offset_y
+
         return Projectile(cannon_x, cannon_y, target, self.damage, 5, YELLOW)
 
     def update_cooldown(self,enemies):
@@ -259,7 +278,7 @@ class SniperTower(Tower):
         self.frame_height = 128
         self.frames = []
         self.current_frame = 0
-        scale_factor = 2.0
+        scale_factor = 1.8
         for i in range(8):
             frame = self.sprite_sheet.subsurface(
                 pygame.Rect(i * self.frame_width, 0, self.frame_width, self.frame_height))
@@ -303,11 +322,20 @@ class SniperTower(Tower):
         self.is_animating = True
         self.animation_timer = len(self.frames) * 5
         self.current_frame = 0
+
         dx = target.x - self.x
         dy = target.y - self.y
         self.angle = math.degrees(math.atan2(dy, dx))
-        cannon_x = self.x + self.cannon_offset_x + math.cos(math.radians(self.angle)) * self.cannon_length
-        cannon_y = self.y + self.cannon_offset_y + math.sin(math.radians(self.angle)) * self.cannon_length
+
+
+        manual_offset_x = -4
+        manual_offset_y = 100
+
+        cannon_x = self.x + self.cannon_offset_x + math.cos(
+            math.radians(self.angle)) * self.cannon_length + manual_offset_x
+        cannon_y = self.y + self.cannon_offset_y + math.sin(
+            math.radians(self.angle)) * self.cannon_length + manual_offset_y
+
         return Projectile(cannon_x, cannon_y, target, self.damage, 5, YELLOW)
 
     def update_cooldown(self,enemies):

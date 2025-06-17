@@ -370,6 +370,22 @@ class Game:
                 radius_surface = pygame.Surface((range_radius * 2, range_radius * 2), pygame.SRCALPHA)
                 pygame.draw.circle(radius_surface, (255, 255, 255, 50), (range_radius, range_radius), range_radius)
                 self.screen.blit(radius_surface, (center_x - range_radius, center_y - range_radius))
+        #draw tower stats
+        if self.selected_tower:
+            info_font = pygame.font.SysFont(None, 22)
+            base_x = SCREEN_WIDTH - 190
+            base_y = 450  # hoặc vị trí bạn muốn
+
+            lines = [
+                f"Level: {getattr(self.selected_tower, 'level', 1)}",
+                f"Damage: {self.selected_tower.damage}",
+                f"Range: {self.selected_tower.range}",
+                f"Reload: {self.selected_tower.fire_rate}",
+            ]
+
+            for i, line in enumerate(lines):
+                text_surface = info_font.render(line, True, WHITE)
+                self.screen.blit(text_surface, (base_x, base_y + i * 25))
 
         # Update display
         pygame.display.flip()
