@@ -77,6 +77,15 @@ class Game:
         return True
 
     def place_tower(self, grid_x: int, grid_y: int) -> bool:
+        # For soldiers, we need to check soldier position validity first
+        if self.selected_tower_type == "soldier" and self.gold >= 75:
+            if self.is_valid_soldier_position(grid_x, grid_y):
+                self.soldiers.append(Soldier(grid_x, grid_y))
+                self.gold -= 75
+                return True
+            return False
+            
+        # For towers, check tower position validity
         if not self.is_valid_tower_position(grid_x, grid_y):
             return False
             
@@ -92,12 +101,6 @@ class Game:
             self.towers.append(RapidTower(grid_x, grid_y))
             self.gold -= 75
             return True
-        elif self.selected_tower_type == "soldier" and self.gold >= 30:
-            if self.is_valid_soldier_position(grid_x, grid_y):
-                self.soldiers.append(Soldier(grid_x, grid_y))
-                self.gold -= 30
-                return True
-            return False
             
         return False
     
@@ -347,45 +350,40 @@ class Game:
                 center_x = grid_x * GRID_SIZE + GRID_SIZE // 2
                 center_y = grid_y * GRID_SIZE + GRID_SIZE // 2
 
-                # Determine tower range (based on type)
-                if self.selected_tower_type == "basic_tower":
-                    range_radius = 120
-                    color = GRAY
-                elif self.selected_tower_type == "sniper_tower":
-                    range_radius = 200
-                    color = GRAY
-                elif self.selected_tower_type == "rapid_tower":
-                    range_radius = 120
-                    color = GRAY
+                # Draw preview based on type
+                if self.selected_tower_type == "soldier":
+                    # For soldier, show range and a semi-transparent soldier preview
+                    if self.is_valid_soldier_position(grid_x, grid_y):
+                        # Draw range circle
+                        pygame.draw.circle(self.screen, (255, 255, 255, 50), (center_x, center_y), 60)  # Soldier range
+                        # Draw semi-transparent soldier preview
+                        s = pygame.Surface((30, 30), pygame.SRCALPHA)  # 30 is soldier diameter
+                        pygame.draw.circle(s, (0, 255, 0, 128), (15, 15), 15)  # Green semi-transparent circle
+                        self.screen.blit(s, (center_x - 15, center_y - 15))
                 else:
-                    range_radius = 0
-                    color = (0, 0, 0)
+                    # Determine tower range (based on type)
+                    if self.selected_tower_type == "basic_tower":
+                        range_radius = 120
+                        color = GRAY
+                    elif self.selected_tower_type == "sniper_tower":
+                        range_radius = 200
+                        color = GRAY
+                    elif self.selected_tower_type == "rapid_tower":
+                        range_radius = 120
+                        color = GRAY
+                    else:
+                        range_radius = 0
+                        color = (0, 0, 0)
 
-                # Draw semi-transparent tower
-                s = pygame.Surface((GRID_SIZE, GRID_SIZE), pygame.SRCALPHA)
-                s.fill((*color, 100))  # mờ mờ
-                self.screen.blit(s, (grid_x * GRID_SIZE, grid_y * GRID_SIZE))
+                    # Draw semi-transparent tower
+                    s = pygame.Surface((GRID_SIZE, GRID_SIZE), pygame.SRCALPHA)
+                    s.fill((*color, 100))  # semi-transparent
+                    self.screen.blit(s, (grid_x * GRID_SIZE, grid_y * GRID_SIZE))
 
-                # Draw radius
-                radius_surface = pygame.Surface((range_radius * 2, range_radius * 2), pygame.SRCALPHA)
-                pygame.draw.circle(radius_surface, (255, 255, 255, 50), (range_radius, range_radius), range_radius)
-                self.screen.blit(radius_surface, (center_x - range_radius, center_y - range_radius))
-        #draw tower stats
-        if self.selected_tower:
-            info_font = pygame.font.SysFont(None, 22)
-            base_x = SCREEN_WIDTH - 190
-            base_y = 450  # hoặc vị trí bạn muốn
-
-            lines = [
-                f"Level: {getattr(self.selected_tower, 'level', 1)}",
-                f"Damage: {self.selected_tower.damage}",
-                f"Range: {self.selected_tower.range}",
-                f"Reload: {self.selected_tower.fire_rate}",
-            ]
-
-            for i, line in enumerate(lines):
-                text_surface = info_font.render(line, True, WHITE)
-                self.screen.blit(text_surface, (base_x, base_y + i * 25))
+                    # Draw radius
+                    radius_surface = pygame.Surface((range_radius * 2, range_radius * 2), pygame.SRCALPHA)
+                    pygame.draw.circle(radius_surface, (255, 255, 255, 50), (range_radius, range_radius), range_radius)
+                    self.screen.blit(radius_surface, (center_x - range_radius, center_y - range_radius))
 
         # Update display
         pygame.display.flip()
