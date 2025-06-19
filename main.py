@@ -1,10 +1,13 @@
 import pygame
 import sys
+from constants import *
+from menu import Menu
+from maps import MAPS, DIFFICULTY_SETTINGS
 from game import Game
+from soldier import Soldier
 from welcome_screen import WelcomeScreen
 from map_selection import MapSelection
 from difficulty_selection import DifficultySelection
-from constants import *
 
 def main():
     # Initialize Pygame
@@ -83,12 +86,6 @@ def main():
                                     current_game.towers.remove(tower)
                                     current_game.selected_tower = None
                                     current_game.selected_unit = None
-                                elif tower_type == "upgrade" and current_game.selected_tower:
-                                    upgrade_cost = 50  # hoặc tính dựa trên level
-                                    if current_game.gold >= upgrade_cost:
-                                        current_game.gold -= upgrade_cost
-                                        current_game.selected_tower.upgrade()  # bạn phải cài sẵn hàm này trong tower
-
                                 else:
                                     current_game.selected_tower_type = tower_type
                                     current_game.selected_tower = None
@@ -150,7 +147,14 @@ def main():
                         grid_x = x // GRID_SIZE
                         grid_y = y // GRID_SIZE
                         
-                        if current_game.is_valid_tower_position(grid_x, grid_y):
+                        # Check if the dragging unit is a soldier or a tower and use appropriate validation
+                        is_valid = False
+                        if isinstance(current_game.dragging_unit, Soldier):
+                            is_valid = current_game.is_valid_soldier_position(grid_x, grid_y)
+                        else:
+                            is_valid = current_game.is_valid_tower_position(grid_x, grid_y)
+                            
+                        if is_valid:
                             current_game.dragging_unit.end_drag(grid_x, grid_y)
                         else:
                             current_game.dragging_unit.end_drag(
@@ -190,6 +194,7 @@ def main():
             if not current_game.game_over:
                 current_game.update()
             current_game.draw()
+        
         # Update display
         pygame.display.flip()
         
