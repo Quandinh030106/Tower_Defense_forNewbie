@@ -353,22 +353,6 @@ class SniperTower(Tower):
             else:
                 self.current_frame = (len(self.frames) - 1) - (self.animation_timer // 5)
 
-class MagicTower(Tower):
-    def __init__(self, grid_x:int, grid_y: int):
-        super().__init__(grid_x, grid_y, damage = 5, range_radius = 150, fire_rate = 5, cost = 80)
-    def draw(self, screen: pygame.Surface, show_range: bool = False):
-        if show_range or self.is_selected:
-            pygame.draw.circle(screen, (255, 255, 255, 100), (int(self.x), int(self.y)), self.range, 1)
-
-        #Draw tower body
-        if self.is_dragging:
-            s = pygame.Surface((GRID_SIZE, GRID_SIZE), pygame.SRCALPHA)
-            s.fill((128, 128, 128, 128))
-            screen.blit(s, (self.x-GRID_SIZE//2, self.y-GRID_SIZE//2))
-        else:
-            pygame.draw.rect(screen, BLUE, (self.grid_x *GRID_SIZE, self.grid_y * GRID_SIZE, GRID_SIZE, GRID_SIZE))
-
-            #Draw tower cannon
             pygame.draw.rect(screen, ICE, (self.x-4, self.y-15, 6, 40))
 
             #Draw tower base outline
