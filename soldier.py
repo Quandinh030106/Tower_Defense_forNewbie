@@ -95,8 +95,11 @@ class Soldier:
         if self.is_selected:
             pygame.draw.circle(screen, YELLOW, (int(self.x), int(self.y)), self.radius + 2, 2)
             # Draw range circle when selected
-            pygame.draw.circle(screen, (255, 255, 255, 100), (int(self.x), int(self.y)), self.range, 1)
-        
+            if self.is_selected or self.is_dragging:
+                radius_surface = pygame.Surface((self.range * 2, self.range * 2), pygame.SRCALPHA)
+                pygame.draw.circle(radius_surface, (255, 255, 255, 50), (self.range, self.range), self.range, width=1)
+                screen.blit(radius_surface, (int(self.x) - self.range, int(self.y) - self.range))
+
         # Draw soldier body
         if self.is_dragging:
             # Draw semi-transparent soldier while dragging

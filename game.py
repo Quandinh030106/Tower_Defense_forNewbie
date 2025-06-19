@@ -355,7 +355,11 @@ class Game:
                     # For soldier, show range and a semi-transparent soldier preview
                     if self.is_valid_soldier_position(grid_x, grid_y):
                         # Draw range circle
-                        pygame.draw.circle(self.screen, (255, 255, 255, 50), (center_x, center_y), 60)  # Soldier range
+                        range_radius = 60
+                        radius_surface = pygame.Surface((range_radius * 2, range_radius * 2), pygame.SRCALPHA)
+                        pygame.draw.circle(radius_surface, (255, 255, 255, 50), (range_radius, range_radius), range_radius, width=1)
+                        self.screen.blit(radius_surface, (center_x - range_radius, center_y - range_radius))
+
                         # Draw semi-transparent soldier preview
                         s = pygame.Surface((30, 30), pygame.SRCALPHA)  # 30 is soldier diameter
                         pygame.draw.circle(s, (0, 255, 0, 128), (15, 15), 15)  # Green semi-transparent circle

@@ -353,7 +353,4 @@ class SniperTower(Tower):
             else:
                 self.current_frame = (len(self.frames) - 1) - (self.animation_timer // 5)
 
-            pygame.draw.rect(screen, ICE, (self.x-4, self.y-15, 6, 40))
 
-            #Draw tower base outline
-            pygame.draw.rect(screen, BLACK, (self.grid_x *GRID_SIZE, self.grid_y*GRID_SIZE, GRID_SIZE, GRID_SIZE), 2)

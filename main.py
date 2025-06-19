@@ -130,11 +130,16 @@ def main():
                                                         current_game.selected_unit.is_selected = False
                                                     soldier.is_selected = True
                                                     current_game.selected_unit = soldier
-                                                    soldier.start_drag(x, y)
-                                                    current_game.dragging_unit = soldier
+
+                                                    if current_game.dragging_enabled:
+                                                        soldier.start_drag(x, y)
+                                                        current_game.dragging_unit = soldier
+                                                    else:
+                                                        current_game.dragging_unit = None
+
                                                     clicked_on_unit = True
                                                     break
-                                            
+
                                             if not clicked_on_unit:
                                                 if current_game.selected_unit:
                                                     current_game.selected_unit.is_selected = False
