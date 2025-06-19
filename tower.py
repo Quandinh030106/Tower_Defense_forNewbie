@@ -26,7 +26,7 @@ class Tower:
         self.level += 1
         self.damage = int(self.damage * 1.5)
         self.range += 10
-        self.fire_rate = max(5, self.fire_rate - 3)  # giảm thời gian hồi, min = 5
+        self.fire_rate = max(5, self.fire_rate - 3)
 
     def can_fire(self) -> bool:
         return self.cooldown <= 0
@@ -95,6 +95,7 @@ class Tower:
         else:
             pygame.draw.rect(screen, GRAY, (self.grid_x * GRID_SIZE, self.grid_y * GRID_SIZE, GRID_SIZE, GRID_SIZE))
             pygame.draw.rect(screen, BLACK, (self.grid_x * GRID_SIZE, self.grid_y * GRID_SIZE, GRID_SIZE, GRID_SIZE), 2)
+
 
 
 class BasicTower(Tower):

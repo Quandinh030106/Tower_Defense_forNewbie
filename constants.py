@@ -11,6 +11,8 @@ SCREEN_HEIGHT = display_info.current_h
 GRID_SIZE = min(SCREEN_WIDTH // 20, SCREEN_HEIGHT // 15)  # Dynamic grid size based on screen dimensions
 GAME_FONT = pygame.font.SysFont('Arial', int(SCREEN_HEIGHT * 0.03))  # Dynamic font size
 TITLE_FONT = pygame.font.SysFont('Arial', int(SCREEN_HEIGHT * 0.05))  # Dynamic font size
+INFO_FONT = pygame.font.SysFont('Arial', int(SCREEN_HEIGHT * 0.022))  # Font nhỏ cho stats
+
 FPS = 60
 
 # Colors

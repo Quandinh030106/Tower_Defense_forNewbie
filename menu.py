@@ -11,7 +11,8 @@ class Menu:
         self.buttons = {}
         self.selected_button: Optional[str] = None
         self.create_buttons()
-        
+        self.selected_tower = None
+
     def create_buttons(self):
         # Tower buttons
         y = 100
@@ -31,12 +32,15 @@ class Menu:
         y += self.button_height + self.button_margin
         self.buttons["sell"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 10, y, self.button_width,self.button_height)
 
-        # Game control buttons
-        y += self.button_height + self.button_margin * 2
-        self.buttons["start_wave"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 10, y, self.button_width, self.button_height)
+        #Upgrade buttion
         y += self.button_height + self.button_margin
-        self.buttons["quit"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 10, y, self.button_width, self.button_height)
-        
+        self.buttons["upgrade"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 10, y, self.button_width,self.button_height)
+
+        # Game control buttons
+        bottom_y = SCREEN_HEIGHT - (self.button_height + self.button_margin) * 2
+        self.buttons["start_wave"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 10, bottom_y, self.button_width,self.button_height)
+        self.buttons["quit"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 10,bottom_y + self.button_height + self.button_margin, self.button_width,self.button_height)
+
         # Map selection buttons
         y += self.button_height + self.button_margin * 2
         for map_name in MAPS.keys():
@@ -71,6 +75,21 @@ class Menu:
         self.draw_button(screen, "Dragging: " + ("ON" if dragging_enabled else "OFF"), "toggle_drag", True)
         #draw sell button
         self.draw_button(screen,"Sell Tower","sell",can_sell)
+        #draw upgrade button
+        self.draw_button(screen, "Upgrade", "upgrade", can_sell)
+        if can_sell:
+            tower = self.selected_tower  # gán để dễ viết
+            stats = [
+                f"Lv {tower.level}",
+                f"DMG: {tower.damage}",
+                f"RNG: {tower.range}",
+                f"RLD: {tower.fire_rate}"
+            ]
+            start_y = self.buttons["upgrade"].bottom + 10
+            for i, line in enumerate(stats):
+                stat_text = INFO_FONT.render(line, True, WHITE)
+                screen.blit(stat_text, (SCREEN_WIDTH - self.button_width, start_y + i * 20))
+
         # Draw game control buttons
         self.draw_button(screen, "Start Wave", "start_wave", True)
         self.draw_button(screen, "Quit", "quit", True)
@@ -83,7 +102,7 @@ class Menu:
         pygame.draw.rect(screen, color, button)
         pygame.draw.rect(screen, BLACK, button, 2)
         
-        text_surface = GAME_FONT.render(text, True, WHITE if enabled else (100, 100, 100))
+        text_surface = INFO_FONT.render(text, True, WHITE if enabled else (100, 100, 100))
         text_rect = text_surface.get_rect(center=button.center)
         screen.blit(text_surface, text_rect)
     
@@ -108,6 +127,9 @@ class Menu:
                 elif button_id == "sell":
                     self.selected_button = None
                     return "sell", 0
+                elif button_id == "upgrade":
+                    self.selected_button = None
+                    return "upgrade", 0
                 elif button_id == "start_wave":
                     self.selected_button = None
                     return "start_wave", 0

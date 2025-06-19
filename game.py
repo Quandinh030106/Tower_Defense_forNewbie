@@ -333,6 +333,7 @@ class Game:
             projectile.draw(self.screen)
         
         # Draw menu
+        self.menu.selected_tower = self.selected_tower
         self.menu.draw(self.screen, self.gold, self.wave, self.lives, self.dragging_enabled, can_sell=bool(self.selected_tower))
 
         
