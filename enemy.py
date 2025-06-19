@@ -17,7 +17,9 @@ class Enemy:
         self.radius = 15
         self.reached_end = False
         self.game = game
-        self.damage = 10  # Base damage for all enemies
+        self.damage = 5  # Reduced base damage for all enemies (was 10)
+        self.attack_cooldown = 0  # Add attack cooldown
+        self.attack_rate = 30  # Attack every 30 frames (0.5 seconds at 60 FPS)
     
     def move(self):
         if not self.path_index < len(self.path) - 1:
@@ -28,14 +30,20 @@ class Enemy:
         current_x, current_y = self.path[self.path_index]
         next_x, next_y = self.path[self.path_index + 1]
         
+        # Update attack cooldown
+        if self.attack_cooldown > 0:
+            self.attack_cooldown -= 1
+        
         # Check if there's a soldier blocking the next position
         for soldier in self.game.soldiers:
             if soldier.grid_x == next_x and soldier.grid_y == next_y:
-                # Attack the soldier
-                soldier.take_damage(self.damage)
+                # Attack the soldier only if cooldown is ready
+                if self.attack_cooldown <= 0:
+                    soldier.take_damage(self.damage)
+                    self.attack_cooldown = self.attack_rate
                 return
         
-        # Move towards next position
+        # Move towards next position if not attacking
         target_x = next_x * GRID_SIZE + GRID_SIZE // 2
         target_y = next_y * GRID_SIZE + GRID_SIZE // 2
         
@@ -92,7 +100,8 @@ class BasicEnemy(Enemy):
 class FastEnemy(Enemy):
     def __init__(self, path: List[Tuple[int, int]], game=None):
         super().__init__(path, speed=2.0, health=30, reward=7, game=game)
-        self.damage = 5
+        self.damage = 3  # Fast enemy does less damage but attacks quickly
+        self.attack_rate = 20  # Attacks more frequently
     
     def draw(self, screen: pygame.Surface):
         pygame.draw.circle(screen, BLUE, (int(self.x), int(self.y)), self.radius)
@@ -112,7 +121,8 @@ class TankEnemy(Enemy):
     def __init__(self, path: List[Tuple[int, int]], game=None):
         super().__init__(path, speed=1.0, health=150, reward=10, game=game)
         self.radius = 20
-        self.damage = 20
+        self.damage = 12  # Tank does more damage but is slower
+        self.attack_rate = 45  # Attacks more slowly
     
     def draw(self, screen: pygame.Surface):
         pygame.draw.circle(screen, PURPLE, (int(self.x), int(self.y)), self.radius)
@@ -129,9 +139,10 @@ class TankEnemy(Enemy):
 
 class Boss(Enemy):
     def __init__(self, path: List[Tuple[int, int]], game=None):
-        super().__init__(path, speed=1.5, health=400, reward=30, game=game)
-        self.radius = 20
-        self.damage = 30
+        super().__init__(path, speed=1.25, health=400, reward=30, game=game)
+        self.radius = 25
+        self.damage = 20  # Boss does high damage
+        self.attack_rate = 45 
     
     def draw(self, screen: pygame.Surface):
         pygame.draw.circle(screen, PINK, (int(self.x), int(self.y)), self.radius)
