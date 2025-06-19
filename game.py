@@ -187,7 +187,12 @@ class Game:
             if tower.can_fire():
                 target = tower.find_target(self.enemies)
                 if target:
-                    self.projectiles.append(tower.fire(target))
+                    result = tower.fire(target)
+                    if isinstance(result, list):
+                        self.projectiles.extend(result)
+                    else:
+                        self.projectiles.append(result)
+
                     tower.reset_cooldown()
         
         # Update soldiers

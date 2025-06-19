@@ -236,7 +236,7 @@ class RapidTower(Tower):
             dy = target.y - cannon_y
             self.angle = math.degrees(math.atan2(dy, dx))
 
-    def fire(self, target: 'Enemy') -> Projectile:
+    def fire(self, target: 'Enemy') -> List[Projectile]:
         self.is_animating = True
         self.animation_timer = len(self.frames) * 5
         self.current_frame = 0
@@ -251,7 +251,30 @@ class RapidTower(Tower):
         cannon_x = self.x + self.cannon_offset_x + math.cos(math.radians(self.angle)) * self.cannon_length + manual_offset_x
         cannon_y = self.y + self.cannon_offset_y + math.sin(math.radians(self.angle)) * self.cannon_length + manual_offset_y
 
-        return Projectile(cannon_x, cannon_y, target, self.damage, 5, YELLOW)
+
+        angle_rad = math.radians(self.angle)
+
+        offset_side = 10
+
+
+        perp_dx = -math.sin(angle_rad)
+        perp_dy = math.cos(angle_rad)
+
+
+        base_x = self.x + self.cannon_offset_x + math.cos(angle_rad) * self.cannon_length
+        base_y = self.y + self.cannon_offset_y + math.sin(angle_rad) * self.cannon_length
+
+
+        left_cannon_x = base_x + perp_dx * offset_side
+        left_cannon_y = base_y + perp_dy * offset_side
+        right_cannon_x = base_x - perp_dx * offset_side
+        right_cannon_y = base_y - perp_dy * offset_side
+
+
+        proj1 = Projectile(left_cannon_x, left_cannon_y, target, self.damage, 5, YELLOW)
+        proj2 = Projectile(right_cannon_x, right_cannon_y, target, self.damage, 5, YELLOW)
+
+        return [proj1, proj2]
 
     def update_cooldown(self,enemies):
         if self.cooldown > 0:
