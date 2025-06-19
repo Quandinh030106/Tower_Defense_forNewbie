@@ -94,9 +94,12 @@ class Game:
             self.gold -= 50
             return True
         elif self.selected_tower_type == "sniper_tower" and self.gold >= 100:
-            self.towers.append(SniperTower(grid_x, grid_y))
+            tower = SniperTower(grid_x, grid_y)
+            tower.game = self
+            self.towers.append(tower)
             self.gold -= 100
             return True
+
         elif self.selected_tower_type == "rapid_tower" and self.gold >= 75:
             self.towers.append(RapidTower(grid_x, grid_y))
             self.gold -= 75

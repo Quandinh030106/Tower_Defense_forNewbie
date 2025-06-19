@@ -290,6 +290,8 @@ class SniperTower(Tower):
         self.cannon_offset_x = 0
         self.cannon_offset_y = -int(GRID_SIZE * scale_factor * 0.5)
 
+        self.game = None
+
     def draw(self, screen: pygame.Surface, show_range: bool = False):
         if show_range or self.is_selected:
             pygame.draw.circle(screen, (255, 255, 255, 100), (int(self.x), int(self.y)), self.range, 1)
@@ -337,7 +339,10 @@ class SniperTower(Tower):
         cannon_y = self.y + self.cannon_offset_y + math.sin(
             math.radians(self.angle)) * self.cannon_length + manual_offset_y
 
-        return Projectile(cannon_x, cannon_y, target, self.damage, 5, YELLOW)
+        proj = Projectile(cannon_x, cannon_y, target, self.damage, 5, YELLOW)
+        proj.game = self.game  # Gắn game để truy cập danh sách enemy
+        proj.aoe_radius = 50  # Bán kính nổ
+        return proj
 
     def update_cooldown(self,enemies):
         if self.cooldown > 0:

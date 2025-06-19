@@ -20,12 +20,19 @@ class Projectile:
         dx = self.target.x - self.x
         dy = self.target.y - self.y
         distance = math.sqrt(dx**2 + dy**2)
-        
-        # Check if we hit the target
+
         if distance < self.radius + self.target.radius:
-            self.target.take_damage(self.damage)
-            return True  # Hit, remove projectile
-        
+            # Nếu đạn có aoe_radius và game thì gây sát thương lan
+            if hasattr(self, "aoe_radius") and hasattr(self, "game"):
+                for enemy in self.game.enemies:
+                    dx = enemy.x - self.target.x
+                    dy = enemy.y - self.target.y
+                    if math.sqrt(dx ** 2 + dy ** 2) <= self.aoe_radius:
+                        enemy.take_damage(self.damage)
+            else:
+                self.target.take_damage(self.damage)
+            return True
+
         # Normalize and move
         if distance > 0:
             dx /= distance
