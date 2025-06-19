@@ -9,9 +9,9 @@ class Soldier:
         self.grid_y = grid_y
         self.x = grid_x * GRID_SIZE + GRID_SIZE // 2
         self.y = grid_y * GRID_SIZE + GRID_SIZE // 2
-        self.health = 50
-        self.max_health = 50
-        self.damage = 5
+        self.health = 150
+        self.max_health = 150
+        self.damage = 8
         self.range = 60
         self.cooldown = 0
         self.fire_rate = 30
@@ -21,6 +21,17 @@ class Soldier:
         self.is_dragging = False
         self.drag_offset_x = 0
         self.drag_offset_y = 0
+        self.armor = 3
+        self.regen_rate = 1
+        self.regen_cooldown = 0
+        self.regen_delay = 60
+
+    def take_damage(self, damage: int):
+        """Take damage from enemies. Updates the soldier's health and returns True if the soldier died."""
+        actual_damage = max(1, damage - self.armor)
+        self.health = max(0, self.health - actual_damage)
+        self.regen_cooldown = self.regen_delay
+        return self.health <= 0
 
     def can_attack(self) -> bool:
         return self.cooldown <= 0
@@ -31,6 +42,11 @@ class Soldier:
     def update_cooldown(self):
         if self.cooldown > 0:
             self.cooldown -= 1
+            
+        if self.regen_cooldown > 0:
+            self.regen_cooldown -= 1
+        elif self.health < self.max_health:
+            self.health = min(self.max_health, self.health + self.regen_rate)
 
     def find_target(self, enemies: List['Enemy']) -> Optional['Enemy']:
         # Find the closest enemy within range
