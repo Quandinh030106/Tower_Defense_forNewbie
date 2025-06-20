@@ -21,7 +21,18 @@ class Game:
         self.map_name = map_name
         self.difficulty = difficulty
         self.reset_game()
-        
+        self.current_path = get_map_path(self.map_name)
+        self.background_image = self.load_map_image(self.map_name)  # Thêm dòng này
+
+    def load_map_image(self, map_name: str) -> Optional[pygame.Surface]:
+        image_path = f"assets/map/{map_name.lower().replace(' ', '_')}.png"  # Giả sử bạn lưu ảnh trong thư mục assets/maps và định dạng là .png
+        try:
+            image = pygame.image.load(image_path).convert_alpha()
+            # Kéo dài hình ảnh để vừa với khu vực trò chơi (SCREEN_WIDTH - 200, SCREEN_HEIGHT)
+            return pygame.transform.scale(image, (SCREEN_WIDTH - 200, SCREEN_HEIGHT))
+        except pygame.error as e:
+            print(f"Không thể tải hình ảnh bản đồ {image_path}: {e}")
+            return None
     def reset_game(self):
         # Get difficulty settings
         settings = get_difficulty_settings(self.difficulty)
@@ -240,7 +251,7 @@ class Game:
             grid_color = (220, 220, 220)  # Light gray
         else:
             grid_color = (50, 50, 50)
-            
+
         # Draw grid lines
         for x in range(0, SCREEN_WIDTH - 200, GRID_SIZE):
             pygame.draw.line(self.screen, grid_color, (x, 0), (x, SCREEN_HEIGHT))
@@ -248,6 +259,7 @@ class Game:
             pygame.draw.line(self.screen, grid_color, (0, y), (SCREEN_WIDTH - 200, y))
     
     def draw_path(self):
+        """
         # Set path color based on map theme
         if self.map_name == "Forest":
             path_color = (139, 69, 19)  # Brown dirt path
@@ -260,6 +272,8 @@ class Game:
             
         for grid_x, grid_y in self.current_path:
             pygame.draw.rect(self.screen, path_color, (grid_x * GRID_SIZE, grid_y * GRID_SIZE, GRID_SIZE, GRID_SIZE))
+        """
+        pass
     
     def draw_map_info(self):
         # Draw game info
@@ -299,14 +313,18 @@ class Game:
     
     def draw(self):
         # Draw background with map-specific theme
-        if self.map_name == "Forest":
-            self.screen.fill((34, 139, 34))  # Forest green
-        elif self.map_name == "Flame Desert":
-            self.screen.fill((210, 180, 140))  # Sandy color
-        elif self.map_name == "Ice Kingdom":
-            self.screen.fill((240, 248, 255))  # Snow white
+        if self.background_image:
+            self.screen.blit(self.background_image, (0, 0))
         else:
-            self.screen.fill(DARK_GREEN)
+            # Nếu không có hình ảnh, vẫn tô màu nền như cũ
+            if self.map_name == "Forest":
+                self.screen.fill((34, 139, 34))
+            elif self.map_name == "Flame Desert":
+                self.screen.fill((210, 180, 140))
+            elif self.map_name == "Ice Kingdom":
+                self.screen.fill((240, 248, 255))
+            else:
+                self.screen.fill(DARK_GREEN)
         
         # Draw grid
         self.draw_grid()
