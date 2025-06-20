@@ -381,5 +381,3 @@ class SniperTower(Tower):
                 self.is_animating = False
             else:
                 self.current_frame = (len(self.frames) - 1) - (self.animation_timer // 5)
-
-
