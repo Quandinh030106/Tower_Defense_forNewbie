@@ -168,13 +168,14 @@ class Game:
         elif enemy_type == 'boss':
             enemy = Boss(self.current_path, self)
         
-        # Apply difficulty multipliers and wave scaling
-        wave_multiplier = 1.5 ** (self.wave - 1)  # 50% increase per wave
+        # Apply difficulty multipliers and wave scaling (7% increase per wave)
+        wave_multiplier = 1.0 + (0.07 * (self.wave - 1))  # 7% increase per wave
+        
         enemy.health = int(enemy.health * settings["enemy_health_multiplier"] * wave_multiplier)
         enemy.max_health = enemy.health
-        enemy.speed *= settings["enemy_speed_multiplier"] * (1 + (wave_multiplier - 1) * 0.3)  # Speed increases by 30% of the health multiplier
-        enemy.reward = int(enemy.reward * settings["enemy_reward_multiplier"] * (1 + (wave_multiplier - 1) * 0.5))  # Reward increases by 50% of the health multiplier
-        enemy.damage = int(enemy.damage * settings["enemy_health_multiplier"] * wave_multiplier)  # Damage scales with health
+        enemy.speed *= settings["enemy_speed_multiplier"] * wave_multiplier
+        enemy.reward = int(enemy.reward * settings["enemy_reward_multiplier"] * wave_multiplier)
+        enemy.damage = int(enemy.damage * settings["enemy_health_multiplier"] * wave_multiplier)
         
         self.enemies.append(enemy)
     
