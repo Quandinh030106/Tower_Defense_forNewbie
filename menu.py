@@ -15,7 +15,7 @@ class Menu:
 
     def create_buttons(self):
         # Tower buttons
-        y = 100
+        y = 140
         self.buttons["basic_tower"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 10, y, self.button_width, self.button_height)
         y += self.button_height + self.button_margin
         self.buttons["rapid_tower"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 10, y, self.button_width, self.button_height)

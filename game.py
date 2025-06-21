@@ -54,7 +54,9 @@ class Game:
         self.dragging_enabled = False
         # Get map path
         self.current_path = get_map_path(self.map_name)
-    
+
+        self.killed_enemies = 0
+
     def is_valid_tower_position(self, grid_x: int, grid_y: int) -> bool:
         # Check if position is on a path
         if (grid_x, grid_y) in self.current_path:
@@ -240,6 +242,7 @@ class Game:
             # Check if enemy is dead
             if enemy.is_dead():
                 self.gold += enemy.reward
+                self.killed_enemies += 1
                 self.enemies.remove(enemy)
     
     def draw_grid(self):
@@ -275,17 +278,19 @@ class Game:
             pygame.draw.rect(self.screen, path_color, (grid_x * GRID_SIZE, grid_y * GRID_SIZE, GRID_SIZE, GRID_SIZE))
         """
         pass
-    
+
     def draw_map_info(self):
-        # Draw game info
+        #draw game info
         gold_text = GAME_FONT.render(f"Gold: {self.gold}", True, WHITE)
         wave_text = GAME_FONT.render(f"Wave: {self.wave}", True, WHITE)
         lives_text = GAME_FONT.render(f"Lives: {self.lives}", True, WHITE)
-        
+        killed_text = GAME_FONT.render(f"Killed: {self.killed_enemies}", True, WHITE)
+
         self.screen.blit(gold_text, (SCREEN_WIDTH - 190, 10))
         self.screen.blit(wave_text, (SCREEN_WIDTH - 190, 35))
         self.screen.blit(lives_text, (SCREEN_WIDTH - 190, 60))
-    
+        self.screen.blit(killed_text, (SCREEN_WIDTH - 190, 85))
+
     def draw_game_over(self):
         overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
         overlay.fill((0, 0, 0, 180))
@@ -354,6 +359,8 @@ class Game:
         # Draw enemies
         for enemy in self.enemies:
             enemy.draw(self.screen)
+
+
         
         # Draw projectiles
         for projectile in self.projectiles:
@@ -363,6 +370,7 @@ class Game:
         self.menu.selected_tower = self.selected_tower
         self.menu.draw(self.screen, self.gold, self.wave, self.lives, self.dragging_enabled, can_sell=bool(self.selected_tower))
 
+        self.draw_map_info()
         
         # Draw game over screen
         restart_button = None
