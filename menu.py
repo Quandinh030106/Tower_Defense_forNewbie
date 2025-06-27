@@ -16,30 +16,30 @@ class Menu:
     def create_buttons(self):
         # Tower buttons
         y = 140
-        self.buttons["basic_tower"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 10, y, self.button_width, self.button_height)
+        self.buttons["basic_tower"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 30 , y, self.button_width, self.button_height)
         y += self.button_height + self.button_margin
-        self.buttons["rapid_tower"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 10, y, self.button_width, self.button_height)
+        self.buttons["rapid_tower"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 30 , y, self.button_width, self.button_height)
         y += self.button_height + self.button_margin
-        self.buttons["sniper_tower"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 10, y, self.button_width, self.button_height)
+        self.buttons["sniper_tower"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 30 , y, self.button_width, self.button_height)
         y += self.button_height + self.button_margin
-        self.buttons["soldier"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 10, y, self.button_width, self.button_height)
+        self.buttons["soldier"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 30 , y, self.button_width, self.button_height)
 
         #dragging button
         y += self.button_height + self.button_margin
-        self.buttons["toggle_drag"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 10, y, self.button_width,self.button_height)
+        self.buttons["toggle_drag"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 30 , y, self.button_width,self.button_height)
 
         #sell button
         y += self.button_height + self.button_margin
-        self.buttons["sell"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 10, y, self.button_width,self.button_height)
+        self.buttons["sell"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 30 , y, self.button_width,self.button_height)
 
         #Upgrade buttion
         y += self.button_height + self.button_margin
-        self.buttons["upgrade"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 10, y, self.button_width,self.button_height)
+        self.buttons["upgrade"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 30 , y, self.button_width,self.button_height)
 
         # Game control buttons
         bottom_y = SCREEN_HEIGHT - (self.button_height + self.button_margin) * 2
-        self.buttons["start_wave"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 10, bottom_y, self.button_width,self.button_height)
-        self.buttons["quit"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 10,bottom_y + self.button_height + self.button_margin, self.button_width,self.button_height)
+        self.buttons["start_wave"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 30 , bottom_y, self.button_width,self.button_height)
+        self.buttons["quit"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 30 ,bottom_y + self.button_height + self.button_margin, self.button_width,self.button_height)
 
         # Map selection buttons
         y += self.button_height + self.button_margin * 2

@@ -78,9 +78,7 @@ class Tower:
     def draw(self, screen: pygame.Surface, show_range: bool = False):
         # Draw selection indicator
         if self.is_selected:
-            pygame.draw.rect(screen, YELLOW,
-                           (self.grid_x * GRID_SIZE - 2, self.grid_y * GRID_SIZE - 2,
-                            GRID_SIZE + 4, GRID_SIZE + 4), 2)
+            pygame.draw.rect(screen, YELLOW,(self.grid_x * GRID_SIZE - 2, self.grid_y * GRID_SIZE - 2,GRID_SIZE + 4, GRID_SIZE + 4), 2)
 
         # Draw range circle if selected
         if show_range or self.is_selected:
@@ -112,21 +110,17 @@ class BasicTower(Tower):
         # Cắt sprite sheet thành 8 frame và scale về GRID_SIZE
         scale_factor = 1.8  # Hoặc 1.5 nếu muốn lớn hơn 1 ô
         for i in range(8):
-            frame = self.sprite_sheet.subsurface(
-                pygame.Rect(i * self.frame_width, 0, self.frame_width, self.frame_height))
-            self.frames.append(
-                pygame.transform.scale(frame, (int(GRID_SIZE * scale_factor), int(GRID_SIZE * scale_factor))))
+            frame = self.sprite_sheet.subsurface(pygame.Rect(i * self.frame_width, 0, self.frame_width, self.frame_height))
+            self.frames.append(pygame.transform.scale(frame, (int(GRID_SIZE * scale_factor), int(GRID_SIZE * scale_factor))))
         self.angle = 0
-        self.cannon_length = 16 * scale_factor  # Điều chỉnh độ dài nòng
-        self.cannon_offset_x = 0
-        self.cannon_offset_y = -int(GRID_SIZE * scale_factor * 0.5)
+        scale_factor = 1.8
+        self.cannon_length = 28 * scale_factor  # Điều chỉnh dựa trên khoảng cách thực tế đến đầu nòng
+        self.cannon_offset_x = 0  # Nòng súng ở giữa theo trục x
+        self.cannon_offset_y = -32 * scale_factor  +64
 
     def draw(self, screen: pygame.Surface, show_range: bool = False):
         if self.is_selected:
-            pygame.draw.rect(screen, YELLOW,
-                            (self.grid_x * GRID_SIZE - 2,
-                             self.grid_y * GRID_SIZE - 2,
-                             GRID_SIZE + 4, GRID_SIZE + 4), 2)
+            pygame.draw.rect(screen, YELLOW,(self.grid_x * GRID_SIZE - 2,self.grid_y * GRID_SIZE - 2,GRID_SIZE + 4, GRID_SIZE + 4), 2)
         if show_range or self.is_selected:
             pygame.draw.circle(screen, (255, 255, 255, 100), (int(self.x), int(self.y)), self.range, 1)
         if self.is_dragging:
@@ -159,12 +153,10 @@ class BasicTower(Tower):
         dy = target.y - self.y
         self.angle = math.degrees(math.atan2(dy, dx))
 
-        # 🔧 Offset thủ công để khớp đầu nòng
-        manual_offset_x =-4
-        manual_offset_y = 80
 
-        cannon_x = self.x + self.cannon_offset_x + math.cos(math.radians(self.angle)) * self.cannon_length + manual_offset_x
-        cannon_y = self.y + self.cannon_offset_y + math.sin(math.radians(self.angle)) * self.cannon_length + manual_offset_y
+        angle_rad = math.radians(self.angle)
+        cannon_x = self.x + self.cannon_offset_x + math.cos(angle_rad) * self.cannon_length
+        cannon_y = self.y + self.cannon_offset_y + math.sin(angle_rad) * self.cannon_length
 
         return Projectile(cannon_x, cannon_y, target, self.damage, 5, YELLOW)
 
@@ -199,14 +191,12 @@ class RapidTower(Tower):
         self.current_frame = 0
         scale_factor = 1.8
         for i in range(8):
-            frame = self.sprite_sheet.subsurface(
-                pygame.Rect(i * self.frame_width, 0, self.frame_width, self.frame_height))
-            self.frames.append(
-                pygame.transform.scale(frame, (int(GRID_SIZE * scale_factor), int(GRID_SIZE * scale_factor))))
+            frame = self.sprite_sheet.subsurface(pygame.Rect(i * self.frame_width, 0, self.frame_width, self.frame_height))
+            self.frames.append(pygame.transform.scale(frame, (int(GRID_SIZE * scale_factor), int(GRID_SIZE * scale_factor))))
         self.angle = 0
         self.cannon_length = 15 * scale_factor
         self.cannon_offset_x = 0
-        self.cannon_offset_y = -int(GRID_SIZE * scale_factor * 0.5)
+        self.cannon_offset_y = -int(GRID_SIZE * scale_factor * 0.5) + 64
 
     def draw(self, screen: pygame.Surface, show_range: bool = False):
         if show_range or self.is_selected:
@@ -245,11 +235,9 @@ class RapidTower(Tower):
         dy = target.y - self.y
         self.angle = math.degrees(math.atan2(dy, dx))
 
-        manual_offset_x = -2
-        manual_offset_y = 100
 
-        cannon_x = self.x + self.cannon_offset_x + math.cos(math.radians(self.angle)) * self.cannon_length + manual_offset_x
-        cannon_y = self.y + self.cannon_offset_y + math.sin(math.radians(self.angle)) * self.cannon_length + manual_offset_y
+        cannon_x = self.x + self.cannon_offset_x + math.cos(math.radians(self.angle)) * self.cannon_length
+        cannon_y = self.y + self.cannon_offset_y + math.sin(math.radians(self.angle)) * self.cannon_length
 
 
         angle_rad = math.radians(self.angle)
@@ -304,14 +292,12 @@ class SniperTower(Tower):
         self.current_frame = 0
         scale_factor = 1.8
         for i in range(8):
-            frame = self.sprite_sheet.subsurface(
-                pygame.Rect(i * self.frame_width, 0, self.frame_width, self.frame_height))
-            self.frames.append(
-                pygame.transform.scale(frame, (int(GRID_SIZE * scale_factor), int(GRID_SIZE * scale_factor))))
+            frame = self.sprite_sheet.subsurface(pygame.Rect(i * self.frame_width, 0, self.frame_width, self.frame_height))
+            self.frames.append(pygame.transform.scale(frame, (int(GRID_SIZE * scale_factor), int(GRID_SIZE * scale_factor))))
         self.angle = 0
-        self.cannon_length = 20 * scale_factor  # Điều chỉnh độ dài nòng
+        self.cannon_length = 24 * scale_factor
         self.cannon_offset_x = 0
-        self.cannon_offset_y = -int(GRID_SIZE * scale_factor * 0.5)
+        self.cannon_offset_y = -int(GRID_SIZE * scale_factor * 0.5) + 64
 
         self.game = None
 
@@ -354,13 +340,8 @@ class SniperTower(Tower):
         self.angle = math.degrees(math.atan2(dy, dx))
 
 
-        manual_offset_x = -4
-        manual_offset_y = 100
-
-        cannon_x = self.x + self.cannon_offset_x + math.cos(
-            math.radians(self.angle)) * self.cannon_length + manual_offset_x
-        cannon_y = self.y + self.cannon_offset_y + math.sin(
-            math.radians(self.angle)) * self.cannon_length + manual_offset_y
+        cannon_x = self.x + self.cannon_offset_x + math.cos(math.radians(self.angle)) * self.cannon_length
+        cannon_y = self.y + self.cannon_offset_y + math.sin(math.radians(self.angle)) * self.cannon_length
 
         proj = Projectile(cannon_x, cannon_y, target, self.damage, 5, YELLOW)
         proj.game = self.game  # Gắn game để truy cập danh sách enemy
