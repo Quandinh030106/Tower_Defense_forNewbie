@@ -343,7 +343,7 @@ class SniperTower(Tower):
         cannon_x = self.x + self.cannon_offset_x + math.cos(math.radians(self.angle)) * self.cannon_length
         cannon_y = self.y + self.cannon_offset_y + math.sin(math.radians(self.angle)) * self.cannon_length
 
-        proj = Projectile(cannon_x, cannon_y, target, self.damage, 5, YELLOW)
+        proj = Projectile(cannon_x, cannon_y, target, self.damage, 5, YELLOW,game=self.game)
         proj.game = self.game  # Gắn game để truy cập danh sách enemy
         proj.aoe_radius = 50  # Bán kính nổ
         return proj

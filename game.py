@@ -11,6 +11,7 @@ from enemy import Enemy, BasicEnemy, FastEnemy, TankEnemy, Boss
 from projectile import Projectile
 from menu import Menu
 from maps import get_map_path, get_map_description, get_difficulty_settings
+from explosion import Explosion
 
 class Game:
     def __init__(self, map_name: str = "Forest", difficulty: str = "Medium"):
@@ -23,6 +24,10 @@ class Game:
         self.reset_game()
         self.current_path = get_map_path(self.map_name)
         self.background_image = self.load_map_image(self.map_name)  # Thêm dòng này
+        self.explosions = []
+
+    def add_explosion(self, x, y):
+        self.explosions.append(Explosion(x, y))
 
     def load_map_image(self, map_name: str) -> Optional[pygame.Surface]:
         image_path = f"assets/map/{map_name.lower().replace(' ', '_')}.png"  # Giả sử bạn lưu ảnh trong thư mục assets/maps và định dạng là .png
@@ -244,7 +249,12 @@ class Game:
                 self.gold += enemy.reward
                 self.killed_enemies += 1
                 self.enemies.remove(enemy)
-    
+
+        for explosion in self.explosions[:]:
+            explosion.update()
+            if explosion.finished:
+                self.explosions.remove(explosion)
+
     def draw_grid(self):
         # Set grid color based on map theme
         if self.map_name == "Forest":
@@ -360,8 +370,10 @@ class Game:
         for enemy in self.enemies:
             enemy.draw(self.screen)
 
+        #Draw explosion
+        for explosion in self.explosions:
+            explosion.draw(self.screen)
 
-        
         # Draw projectiles
         for projectile in self.projectiles:
             projectile.draw(self.screen)

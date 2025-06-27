@@ -2,7 +2,7 @@ import math
 import pygame
 
 class Projectile:
-    def __init__(self, x: int, y: int, target, damage: int, speed: int, color: tuple):
+    def __init__(self, x: int, y: int, target, damage: int, speed: int, color: tuple,game=None):
         self.x = x
         self.y = y
         self.target = target
@@ -11,6 +11,7 @@ class Projectile:
         self.color = color
         self.radius = 5
         self.hit = False
+        self.game = game
 
     def move(self) -> bool:
         if self.target.health <= 0:
@@ -31,6 +32,9 @@ class Projectile:
                         enemy.take_damage(self.damage)
             else:
                 self.target.take_damage(self.damage)
+            if self.game:
+                self.game.add_explosion(self.x, self.y)
+                
             return True
 
         # Normalize and move
