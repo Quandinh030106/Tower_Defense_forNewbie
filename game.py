@@ -150,8 +150,8 @@ class Game:
     
     def spawn_enemies(self):
         settings = get_difficulty_settings(self.difficulty)
-        # Base number of enemies increases by 50% each wave
-        base_num_enemies = int(5 * (1.5 ** (self.wave - 1)))
+        # Base number of enemies increases by 30% each wave
+        base_num_enemies = int(5 * (1.3 ** (self.wave - 1)))
         num_enemies = int(base_num_enemies * settings["wave_size_multiplier"])
         
         # Different mix of enemies based on wave number
@@ -193,8 +193,8 @@ class Game:
         elif enemy_type == 'boss':
             enemy = Boss(self.current_path, self)
         
-        # Apply difficulty multipliers and wave scaling (7% increase per wave)
-        wave_multiplier = 1.0 + (0.07 * (self.wave - 1))  # 7% increase per wave
+        # Apply difficulty multipliers and wave scaling (9% increase per wave)
+        wave_multiplier = 1.0 + (0.07 * (self.wave - 1))  # 9% increase per wave
         
         enemy.health = int(enemy.health * settings["enemy_health_multiplier"] * wave_multiplier)
         enemy.max_health = enemy.health
