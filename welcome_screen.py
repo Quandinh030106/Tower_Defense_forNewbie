@@ -10,6 +10,9 @@ class WelcomeScreen:
         self.button_margin = int(SCREEN_HEIGHT * 0.02)  # Dynamic margin
         self.buttons = {}
         self.create_buttons()
+
+        self.click_sound = pygame.mixer.Sound("assets/sounds/Menu Selection Click.wav")
+        self.click_sound.set_volume(0.3)
         
     def create_buttons(self):
         # Title position
@@ -66,5 +69,6 @@ class WelcomeScreen:
     def handle_click(self, pos) -> Optional[str]:
         for button_id, button in self.buttons.items():
             if button.collidepoint(pos):
+                self.click_sound.play()
                 return button_id
         return None 

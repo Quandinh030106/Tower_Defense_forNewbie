@@ -12,6 +12,8 @@ class Menu:
         self.selected_button: Optional[str] = None
         self.create_buttons()
         self.selected_tower = None
+        self.click_sound = pygame.mixer.Sound("assets/sounds/Menu Selection Click.wav")
+        self.click_sound.set_volume(0.3)
 
     def create_buttons(self):
         # Tower buttons
@@ -111,33 +113,44 @@ class Menu:
             if button.collidepoint(pos):
                 if button_id == "basic_tower" and gold >= 50:
                     self.selected_button = "basic_tower"
+                    self.click_sound.play()
                     return "basic_tower", 50
                 elif button_id == "rapid_tower" and gold >= 75:
                     self.selected_button = "rapid_tower"
+                    self.click_sound.play()
                     return "rapid_tower", 75
                 elif button_id == "sniper_tower" and gold >= 100:
                     self.selected_button = "sniper_tower"
+                    self.click_sound.play()
                     return "sniper_tower", 100
                 elif button_id == "soldier" and gold >= 75:
                     self.selected_button = "soldier"
+                    self.click_sound.play()
                     return "soldier", 75
                 elif button_id == "toggle_drag":
                     self.selected_button = None
+                    self.click_sound.play()
                     return "toggle_drag", 0
                 elif button_id == "sell":
                     self.selected_button = None
+                    self.click_sound.play()
                     return "sell", 0
                 elif button_id == "upgrade":
                     self.selected_button = None
+                    self.click_sound.play()
                     return "upgrade", 0
                 elif button_id == "start_wave":
                     self.selected_button = None
+                    self.click_sound.play()
                     return "start_wave", 0
                 elif button_id == "quit":
                     self.selected_button = None
+                    self.click_sound.play()
                     return "quit", 0
                 elif button_id.startswith("map_"):
+                    self.click_sound.play()
                     return f"select_map_{button_id[4:]}", 0
                 elif button_id.startswith("diff_"):
+                    self.click_sound.play()
                     return f"select_difficulty_{button_id[5:]}", 0
         return None, 0 

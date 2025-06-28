@@ -13,6 +13,9 @@ class DifficultySelection:
         self.buttons = {}
         self.selected_difficulty = "Medium"
         self.create_buttons()
+
+        self.click_sound = pygame.mixer.Sound("assets/sounds/Menu Selection Click.wav")
+        self.click_sound.set_volume(0.3)
         
     def create_buttons(self):
         # Title position
@@ -99,9 +102,12 @@ class DifficultySelection:
             if button.collidepoint(pos):
                 if button_id.startswith("diff_"):
                     self.selected_difficulty = button_id[5:]
+                    self.click_sound.play()
                     return None, None, None
                 elif button_id == "start":
+                    self.click_sound.play()
                     return "start", self.selected_map, self.selected_difficulty
                 elif button_id == "back":
+                    self.click_sound.play()
                     return "back", None, None
         return None, None, None 

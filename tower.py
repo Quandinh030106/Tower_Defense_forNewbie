@@ -22,6 +22,9 @@ class Tower:
         self.drag_offset_y = 0
         self.level = 1
 
+        self.shoot_sound = pygame.mixer.Sound("assets/sounds/cannon_fire.ogg")
+        self.shoot_sound.set_volume(0.2)
+
     def upgrade(self):
         self.level += 1
         self.damage = int(self.damage * 1.5)
@@ -145,6 +148,8 @@ class BasicTower(Tower):
             self.angle = math.degrees(math.atan2(dy, dx))
 
     def fire(self, target: 'Enemy') -> Projectile:
+        self.shoot_sound.play()
+
         self.is_animating = True
         self.animation_timer = len(self.frames) * 5
         self.current_frame = 0
@@ -227,6 +232,8 @@ class RapidTower(Tower):
             self.angle = math.degrees(math.atan2(dy, dx))
 
     def fire(self, target: 'Enemy') -> List[Projectile]:
+        self.shoot_sound.play()
+
         self.is_animating = True
         self.animation_timer = len(self.frames) * 5
         self.current_frame = 0
@@ -301,6 +308,9 @@ class SniperTower(Tower):
 
         self.game = None
 
+        self.explosion_sound = pygame.mixer.Sound("assets/sounds/explosion.wav")
+        self.explosion_sound.set_volume(0.2)
+
     def draw(self, screen: pygame.Surface, show_range: bool = False):
         if show_range or self.is_selected:
             pygame.draw.circle(screen, (255, 255, 255, 100), (int(self.x), int(self.y)), self.range, 1)
@@ -331,6 +341,8 @@ class SniperTower(Tower):
             self.angle = math.degrees(math.atan2(dy, dx))
 
     def fire(self, target: 'Enemy') -> Projectile:
+        self.shoot_sound.play()
+
         self.is_animating = True
         self.animation_timer = len(self.frames) * 5
         self.current_frame = 0

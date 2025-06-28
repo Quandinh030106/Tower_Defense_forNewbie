@@ -12,6 +12,9 @@ class MapSelection:
         self.buttons = {}
         self.selected_map = "Forest"
         self.create_buttons()
+
+        self.click_sound = pygame.mixer.Sound("assets/sounds/Menu Selection Click.wav")
+        self.click_sound.set_volume(0.3)
         
     def create_buttons(self):
         # Title position
@@ -97,9 +100,12 @@ class MapSelection:
             if button.collidepoint(pos):
                 if button_id.startswith("map_"):
                     self.selected_map = button_id[4:]
+                    self.click_sound.play()
                     return None, None
                 elif button_id == "next":
+                    self.click_sound.play()
                     return "next", self.selected_map
                 elif button_id == "back":
+                    self.click_sound.play()
                     return "back", None
         return None, None 
