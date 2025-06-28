@@ -31,7 +31,7 @@ class Projectile:
                     if math.sqrt(dx ** 2 + dy ** 2) <= self.aoe_radius:
                         enemy.take_damage(self.damage)
 
-                if hasattr(self, "game"):
+                if hasattr(self, "game") and self.game.sound_enabled:
                     for tower in self.game.towers:
                         if type(tower).__name__ == "SniperTower":
                             tower.explosion_sound.play()

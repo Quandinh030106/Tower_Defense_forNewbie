@@ -16,11 +16,6 @@ def main():
     pygame.mixer.init()
 
     pygame.mixer.set_num_channels(64)
-    pygame.mixer.music.load("assets/sounds/Battle in the winter.mp3")
-    pygame.mixer.music.set_volume(0.4)
-    pygame.mixer.music.play(-1)
-
-
 
     # Create initial window
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))

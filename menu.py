@@ -12,8 +12,11 @@ class Menu:
         self.selected_button: Optional[str] = None
         self.create_buttons()
         self.selected_tower = None
+        self.sound_enabled = True
+        self.music_enabled = True
         self.click_sound = pygame.mixer.Sound("assets/sounds/Menu Selection Click.wav")
         self.click_sound.set_volume(0.3)
+
 
     def create_buttons(self):
         # Tower buttons
@@ -39,9 +42,11 @@ class Menu:
         self.buttons["upgrade"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 30 , y, self.button_width,self.button_height)
 
         # Game control buttons
-        bottom_y = SCREEN_HEIGHT - (self.button_height + self.button_margin) * 2
+        bottom_y = SCREEN_HEIGHT - (self.button_height + self.button_margin) * 4
         self.buttons["start_wave"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 30 , bottom_y, self.button_width,self.button_height)
         self.buttons["quit"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 30 ,bottom_y + self.button_height + self.button_margin, self.button_width,self.button_height)
+        self.buttons["toggle_sound"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 30,bottom_y + 2*self.button_height + 2*self.button_margin, self.button_width,self.button_height)
+        self.buttons["toggle_music"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 30, bottom_y + 3*self.button_height + 3*self.button_margin, self.button_width,self.button_height)
 
         # Map selection buttons
         y += self.button_height + self.button_margin * 2
@@ -74,11 +79,15 @@ class Menu:
         self.draw_button(screen, "Sniper Tower (100g)", "sniper_tower", gold >= 100)
         self.draw_button(screen, "Soldier (75g)", "soldier", gold >= 75)
         #draw dragging button
-        self.draw_button(screen, "Dragging: " + ("ON" if dragging_enabled else "OFF"), "toggle_drag", True)
+        self.draw_button(screen, "Drag: " + ("ON" if dragging_enabled else "OFF"), "toggle_drag", True)
         #draw sell button
         self.draw_button(screen,"Sell Tower","sell",can_sell)
         #draw upgrade button
         self.draw_button(screen, "Upgrade", "upgrade", can_sell)
+        #draw music control buttion
+        self.draw_button(screen, "Sound: " + ("ON" if self.sound_enabled else "OFF"), "toggle_sound", True)
+        self.draw_button(screen, "Music: " + ("ON" if self.music_enabled else "OFF"), "toggle_music", True)
+
         if can_sell:
             tower = self.selected_tower  # gán để dễ viết
             stats = [
@@ -113,44 +122,70 @@ class Menu:
             if button.collidepoint(pos):
                 if button_id == "basic_tower" and gold >= 50:
                     self.selected_button = "basic_tower"
-                    self.click_sound.play()
+                    if self.sound_enabled:
+                        self.click_sound.play()
                     return "basic_tower", 50
                 elif button_id == "rapid_tower" and gold >= 75:
                     self.selected_button = "rapid_tower"
-                    self.click_sound.play()
+                    if self.sound_enabled:
+                        self.click_sound.play()
                     return "rapid_tower", 75
                 elif button_id == "sniper_tower" and gold >= 100:
                     self.selected_button = "sniper_tower"
-                    self.click_sound.play()
+                    if self.sound_enabled:
+                        self.click_sound.play()
                     return "sniper_tower", 100
                 elif button_id == "soldier" and gold >= 75:
                     self.selected_button = "soldier"
-                    self.click_sound.play()
+                    if self.sound_enabled:
+                        self.click_sound.play()
                     return "soldier", 75
                 elif button_id == "toggle_drag":
                     self.selected_button = None
-                    self.click_sound.play()
+                    if self.sound_enabled:
+                        self.click_sound.play()
                     return "toggle_drag", 0
                 elif button_id == "sell":
                     self.selected_button = None
-                    self.click_sound.play()
+                    if self.sound_enabled:
+                        self.click_sound.play()
                     return "sell", 0
                 elif button_id == "upgrade":
                     self.selected_button = None
-                    self.click_sound.play()
+                    if self.sound_enabled:
+                        self.click_sound.play()
                     return "upgrade", 0
+                elif button_id == "toggle_sound":
+                    self.sound_enabled = not self.sound_enabled
+                    if self.sound_enabled:
+                        self.click_sound.play()
+                    return "toggle_sound", 0
+                elif button_id == "toggle_music":
+                    if self.sound_enabled:
+                        self.click_sound.play()
+                    self.music_enabled = not self.music_enabled
+                    if self.music_enabled:
+                        pygame.mixer.music.play(-1)
+                    else:
+                        pygame.mixer.music.stop()
+                    return "toggle_music", 0
+
                 elif button_id == "start_wave":
                     self.selected_button = None
-                    self.click_sound.play()
+                    if self.sound_enabled:
+                        self.click_sound.play()
                     return "start_wave", 0
                 elif button_id == "quit":
                     self.selected_button = None
-                    self.click_sound.play()
+                    if self.sound_enabled:
+                        self.click_sound.play()
                     return "quit", 0
                 elif button_id.startswith("map_"):
-                    self.click_sound.play()
+                    if self.sound_enabled:
+                        self.click_sound.play()
                     return f"select_map_{button_id[4:]}", 0
                 elif button_id.startswith("diff_"):
-                    self.click_sound.play()
+                    if self.sound_enabled:
+                        self.click_sound.play()
                     return f"select_difficulty_{button_id[5:]}", 0
         return None, 0 

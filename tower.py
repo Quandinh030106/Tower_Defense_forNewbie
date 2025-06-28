@@ -21,6 +21,7 @@ class Tower:
         self.drag_offset_x = 0
         self.drag_offset_y = 0
         self.level = 1
+        self.game = None
 
         self.shoot_sound = pygame.mixer.Sound("assets/sounds/cannon_fire.ogg")
         self.shoot_sound.set_volume(0.2)
@@ -148,7 +149,8 @@ class BasicTower(Tower):
             self.angle = math.degrees(math.atan2(dy, dx))
 
     def fire(self, target: 'Enemy') -> Projectile:
-        self.shoot_sound.play()
+        if self.game and self.game.menu.sound_enabled:
+            self.shoot_sound.play()
 
         self.is_animating = True
         self.animation_timer = len(self.frames) * 5
@@ -232,7 +234,8 @@ class RapidTower(Tower):
             self.angle = math.degrees(math.atan2(dy, dx))
 
     def fire(self, target: 'Enemy') -> List[Projectile]:
-        self.shoot_sound.play()
+        if self.game and self.game.menu.sound_enabled:
+            self.shoot_sound.play()
 
         self.is_animating = True
         self.animation_timer = len(self.frames) * 5
@@ -341,7 +344,9 @@ class SniperTower(Tower):
             self.angle = math.degrees(math.atan2(dy, dx))
 
     def fire(self, target: 'Enemy') -> Projectile:
-        self.shoot_sound.play()
+        if self.game and self.game.menu.sound_enabled:
+            self.shoot_sound.play()
+
 
         self.is_animating = True
         self.animation_timer = len(self.frames) * 5

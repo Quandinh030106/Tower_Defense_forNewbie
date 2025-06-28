@@ -26,6 +26,15 @@ class Game:
         self.background_image = self.load_map_image(self.map_name)  # Thêm dòng này
         self.explosions = []
 
+        # Play background music only when entering the game screen
+        if pygame.mixer.get_init():
+            if pygame.mixer.music.get_busy():
+                pygame.mixer.music.stop()
+            if self.menu.sound_enabled:
+                pygame.mixer.music.load("assets/sounds/Battle in the winter.mp3")
+                pygame.mixer.music.set_volume(0.4)
+                pygame.mixer.music.play(-1)  # Loop
+
     def add_explosion(self, x, y):
         self.explosions.append(Explosion(x, y))
 
@@ -108,18 +117,27 @@ class Game:
             return False
             
         if self.selected_tower_type == "basic_tower" and self.gold >= 50:
-            self.towers.append(BasicTower(grid_x, grid_y))
+            tower = BasicTower(grid_x, grid_y)
+            tower.game = self
+            self.towers.append(tower)
+
             self.gold -= 50
             return True
         elif self.selected_tower_type == "sniper_tower" and self.gold >= 100:
             tower = SniperTower(grid_x, grid_y)
             tower.game = self
             self.towers.append(tower)
+
+            tower.game = self
+            self.towers.append(tower)
             self.gold -= 100
             return True
 
         elif self.selected_tower_type == "rapid_tower" and self.gold >= 75:
-            self.towers.append(RapidTower(grid_x, grid_y))
+            tower = RapidTower(grid_x, grid_y)
+            tower.game = self
+            self.towers.append(tower)
+
             self.gold -= 75
             return True
             
@@ -254,6 +272,8 @@ class Game:
             explosion.update()
             if explosion.finished:
                 self.explosions.remove(explosion)
+
+        self.sound_enabled = self.menu.sound_enabled
 
     def draw_grid(self):
         # Set grid color based on map theme
