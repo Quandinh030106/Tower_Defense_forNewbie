@@ -28,7 +28,7 @@ class Tower:
 
     def upgrade(self):
         self.level += 1
-        self.damage = int(self.damage * 1.5)
+        self.damage = int(self.damage * 1.2)
         self.range += 10
         self.fire_rate = max(5, self.fire_rate - 3)
 
@@ -102,7 +102,7 @@ class Tower:
 
 class BasicTower(Tower):
     def __init__(self, grid_x: int, grid_y: int):
-        super().__init__(grid_x, grid_y, damage=10, range_radius=120, fire_rate=30, cost=50)
+        super().__init__(grid_x, grid_y, damage=15, range_radius=120, fire_rate=30, cost=50)
         self.animation_timer = 0
         self.is_animating = False
         # Load sprite sheet mới
@@ -291,7 +291,7 @@ class RapidTower(Tower):
 
 class SniperTower(Tower):
     def __init__(self, grid_x: int, grid_y: int):
-        super().__init__(grid_x, grid_y, damage=30, range_radius=200, fire_rate=60, cost=100)
+        super().__init__(grid_x, grid_y, damage=15, range_radius=200, fire_rate=60, cost=100)
         self.animation_timer = 0
         self.is_animating = False
         # Load sprite sheet mới
@@ -312,7 +312,7 @@ class SniperTower(Tower):
         self.game = None
 
         self.explosion_sound = pygame.mixer.Sound("assets/sounds/explosion.wav")
-        self.explosion_sound.set_volume(0.2)
+        self.explosion_sound.set_volume(0.05)
 
     def draw(self, screen: pygame.Surface, show_range: bool = False):
         if show_range or self.is_selected:
