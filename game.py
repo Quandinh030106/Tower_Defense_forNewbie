@@ -193,8 +193,8 @@ class Game:
         elif enemy_type == 'boss':
             enemy = Boss(self.current_path, self)
         
-        # Apply difficulty multipliers and wave scaling (9% increase per wave)
-        wave_multiplier = 1.0 + (0.07 * (self.wave - 1))  # 9% increase per wave
+        # Apply difficulty multipliers and wave scaling (10% increase per wave)
+        wave_multiplier = 1.0 + (0.1 * (self.wave - 1))  # 10% increase per wave
         
         enemy.health = int(enemy.health * settings["enemy_health_multiplier"] * wave_multiplier)
         enemy.max_health = enemy.health
