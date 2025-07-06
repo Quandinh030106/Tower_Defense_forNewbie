@@ -5,7 +5,7 @@ import random
 from typing import List, Tuple, Dict, Optional
 
 from constants import *
-from tower import Tower, BasicTower, RapidTower, SniperTower
+from tower import Tower, BasicTower, RapidTower, SniperTower,LaserTower,SlowTower
 from soldier import Soldier
 from enemy import Enemy, BasicEnemy, FastEnemy, TankEnemy, Boss
 from projectile import Projectile
@@ -25,6 +25,7 @@ class Game:
         self.current_path = get_map_path(self.map_name)
         self.background_image = self.load_map_image(self.map_name)  # Thêm dòng này
         self.explosions = []
+        self.auto_wave = False
 
         # Play background music only when entering the game screen
         if pygame.mixer.get_init():
@@ -140,13 +141,25 @@ class Game:
 
             self.gold -= 75
             return True
-            
+        elif self.selected_tower_type == "laser_tower" and self.gold >= 120:
+            tower = LaserTower(grid_x, grid_y)
+            tower.game = self
+            self.towers.append(tower)
+            self.gold -= 120
+            return True
+        elif self.selected_tower_type == "slow_tower" and self.gold >= 90:
+            tower = SlowTower(grid_x, grid_y)
+            tower.game = self
+            self.towers.append(tower)
+            self.gold -= 90
+            return True
+
         return False
     
     def start_wave(self):
-        if not self.wave_in_progress:
-            self.wave_in_progress = True
-            self.spawn_enemies()
+
+        self.wave_in_progress = True
+        self.spawn_enemies()
     
     def spawn_enemies(self):
         settings = get_difficulty_settings(self.difficulty)
@@ -216,8 +229,11 @@ class Game:
         if self.wave_in_progress and not self.enemy_queue and not self.enemies:
             self.wave_in_progress = False
             self.wave += 1
-            self.gold += 30 + (self.wave * 2)  # Gold reward for completing wave
-        
+            self.gold += 30 + (self.wave * 2)
+
+            if self.auto_wave:
+                self.start_wave()
+
         # Update towers
         for tower in self.towers:
             tower.update_cooldown(self.enemies)
@@ -225,12 +241,13 @@ class Game:
                 target = tower.find_target(self.enemies)
                 if target:
                     result = tower.fire(target)
-                    if isinstance(result, list):
-                        self.projectiles.extend(result)
-                    else:
-                        self.projectiles.append(result)
-
                     tower.reset_cooldown()
+
+                    if result:
+                        if isinstance(result, list):
+                            self.projectiles.extend(result)
+                        else:
+                            self.projectiles.append(result)
         
         # Update soldiers
         for soldier in self.soldiers[:]:
@@ -400,10 +417,14 @@ class Game:
         
         # Draw menu
         self.menu.selected_tower = self.selected_tower
+
+        self.auto_wave = self.menu.auto_wave
+
+
         self.menu.draw(self.screen, self.gold, self.wave, self.lives, self.dragging_enabled, can_sell=bool(self.selected_tower))
 
         self.draw_map_info()
-        
+
         # Draw game over screen
         restart_button = None
         if self.game_over:
@@ -482,12 +503,15 @@ class Game:
                         
                         # Check for menu clicks
                         tower_type, cost = self.menu.handle_click(mouse_pos, self.gold)
-                        
+
                         if tower_type:
                             if tower_type == "quit":
                                 running = False
                             elif tower_type == "start_wave":
                                 self.start_wave()
+                            elif tower_type == "toggle_auto_wave":
+                                self.auto_wave = self.menu.auto_wave
+
                             else:
                                 self.selected_tower_type = tower_type
                                 self.selected_tower = None

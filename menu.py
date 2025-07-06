@@ -16,18 +16,22 @@ class Menu:
         self.music_enabled = True
         self.click_sound = pygame.mixer.Sound("assets/sounds/Menu Selection Click.wav")
         self.click_sound.set_volume(0.3)
-
+        self.auto_wave = False
 
     def create_buttons(self):
         # Tower buttons
         y = 140
-        self.buttons["basic_tower"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 30 , y, self.button_width, self.button_height)
+        self.buttons["basic_tower"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 70 , y, self.button_width - 30, self.button_height)
+        self.buttons["slow_tower"] = pygame.Rect(SCREEN_WIDTH - self.button_width + 25, y, self.button_width- 30, self.button_height)
+
         y += self.button_height + self.button_margin
-        self.buttons["rapid_tower"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 30 , y, self.button_width, self.button_height)
+        self.buttons["rapid_tower"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 70 , y, self.button_width -30 , self.button_height)
         y += self.button_height + self.button_margin
-        self.buttons["sniper_tower"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 30 , y, self.button_width, self.button_height)
+        self.buttons["sniper_tower"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 70 , y, self.button_width -30, self.button_height)
         y += self.button_height + self.button_margin
-        self.buttons["soldier"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 30 , y, self.button_width, self.button_height)
+        self.buttons["laser_tower"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 70, y, self.button_width -30 ,self.button_height)
+        y += self.button_height + self.button_margin
+        self.buttons["soldier"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 70 , y, self.button_width- 30, self.button_height)
 
         #dragging button
         y += self.button_height + self.button_margin
@@ -42,12 +46,12 @@ class Menu:
         self.buttons["upgrade"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 30 , y, self.button_width,self.button_height)
 
         # Game control buttons
-        bottom_y = SCREEN_HEIGHT - (self.button_height + self.button_margin) * 4
+        bottom_y = SCREEN_HEIGHT - (self.button_height + self.button_margin) * 5
         self.buttons["start_wave"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 30 , bottom_y, self.button_width,self.button_height)
         self.buttons["quit"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 30 ,bottom_y + self.button_height + self.button_margin, self.button_width,self.button_height)
         self.buttons["toggle_sound"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 30,bottom_y + 2*self.button_height + 2*self.button_margin, self.button_width,self.button_height)
         self.buttons["toggle_music"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 30, bottom_y + 3*self.button_height + 3*self.button_margin, self.button_width,self.button_height)
-
+        self.buttons["auto_wave"] = pygame.Rect(SCREEN_WIDTH - self.button_width - 30,bottom_y + 4 * self.button_height + 4 * self.button_margin,self.button_width, self.button_height)
         # Map selection buttons
         y += self.button_height + self.button_margin * 2
         for map_name in MAPS.keys():
@@ -74,9 +78,12 @@ class Menu:
         screen.blit(lives_text, (SCREEN_WIDTH - 190, 60))
         
         # Draw tower buttons
-        self.draw_button(screen, "Basic Tower (50g)", "basic_tower", gold >= 50)
-        self.draw_button(screen, "Rapid Tower (75g)", "rapid_tower", gold >= 75)
-        self.draw_button(screen, "Sniper Tower (100g)", "sniper_tower", gold >= 100)
+        self.draw_button(screen, "Basic (50g)", "basic_tower", gold >= 50)
+        self.draw_button(screen, "Rapid (75g)", "rapid_tower", gold >= 75)
+        self.draw_button(screen, "Sniper (100g)", "sniper_tower", gold >= 100)
+        self.draw_button(screen, "Laser (120g)", "laser_tower", gold >= 120)
+        self.draw_button(screen, "Slow (90g)", "slow_tower", gold >= 90)
+
         self.draw_button(screen, "Soldier (75g)", "soldier", gold >= 75)
         #draw dragging button
         self.draw_button(screen, "Drag: " + ("ON" if dragging_enabled else "OFF"), "toggle_drag", True)
@@ -87,6 +94,8 @@ class Menu:
         #draw music control buttion
         self.draw_button(screen, "Sound: " + ("ON" if self.sound_enabled else "OFF"), "toggle_sound", True)
         self.draw_button(screen, "Music: " + ("ON" if self.music_enabled else "OFF"), "toggle_music", True)
+
+        self.draw_button(screen, "Auto Wave: " + ("ON" if self.auto_wave else "OFF"), "auto_wave", True)
 
         if can_sell:
             tower = self.selected_tower  # gán để dễ viết
@@ -140,6 +149,23 @@ class Menu:
                     if self.sound_enabled:
                         self.click_sound.play()
                     return "soldier", 75
+                elif button_id == "laser_tower" and gold >= 120:
+                    self.selected_button = "laser_tower"
+                    if self.sound_enabled:
+                        self.click_sound.play()
+                    return "laser_tower", 120
+                elif button_id == "slow_tower" and gold >= 90:
+                    self.selected_button = "slow_tower"
+                    if self.sound_enabled:
+                        self.click_sound.play()
+                    return "slow_tower", 90
+                elif button_id == "auto_wave":
+                    self.auto_wave = not self.auto_wave
+                    if self.sound_enabled:
+                        self.click_sound.play()
+                    return "toggle_auto_wave", 0
+
+
                 elif button_id == "toggle_drag":
                     self.selected_button = None
                     if self.sound_enabled:

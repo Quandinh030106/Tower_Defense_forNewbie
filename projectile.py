@@ -53,4 +53,37 @@ class Projectile:
         return False  # Keep moving
     
     def draw(self, screen: pygame.Surface):
-        pygame.draw.circle(screen, self.color, (int(self.x), int(self.y)), self.radius) 
+        pygame.draw.circle(screen, self.color, (int(self.x), int(self.y)), self.radius)
+
+class SlowProjectile(Projectile):
+    def __init__(self, x, y, target, damage, speed, color, slow_factor=0.5, slow_duration=90, game=None):
+        super().__init__(x, y, target, damage, speed, color, game)
+        self.slow_factor = slow_factor
+        self.slow_duration = slow_duration
+
+    def move(self) -> bool:
+        if self.target.health <= 0:
+            return True
+
+        dx = self.target.x - self.x
+        dy = self.target.y - self.y
+        distance = math.hypot(dx, dy)
+
+        if distance < self.radius + self.target.radius:
+
+            self.target.take_damage(self.damage)
+
+
+            self.target.apply_slow(self.slow_factor, self.slow_duration)
+
+            if self.game:
+                self.game.add_explosion(self.x, self.y)
+            return True
+
+        if distance > 0:
+            dx /= distance
+            dy /= distance
+            self.x += dx * self.speed
+            self.y += dy * self.speed
+
+        return False

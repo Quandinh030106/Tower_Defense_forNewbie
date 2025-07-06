@@ -26,6 +26,16 @@ class Soldier:
         self.regen_cooldown = 0
         self.regen_delay = 60
 
+
+        self.image_original = pygame.image.load("assets/soldier/soldier.png").convert_alpha()
+
+
+        scale_factor = GRID_SIZE / 96
+        new_size = (int(96 * scale_factor), int(96 * scale_factor))
+        self.image = pygame.transform.scale(self.image_original, new_size)
+
+        self.rect = self.image.get_rect(center=(self.x, self.y))
+
     def take_damage(self, damage: int):
         """Take damage from enemies. Updates the soldier's health and returns True if the soldier died."""
         actual_damage = max(1, damage - self.armor)
@@ -91,49 +101,30 @@ class Soldier:
         self.angle = angle
 
     def draw(self, screen: pygame.Surface):
-        # Draw selection indicator
+        # Vẽ vùng chọn và bán kính nếu đang chọn
         if self.is_selected:
             pygame.draw.circle(screen, YELLOW, (int(self.x), int(self.y)), self.radius + 2, 2)
-            # Draw range circle when selected
-            if self.is_selected or self.is_dragging:
-                radius_surface = pygame.Surface((self.range * 2, self.range * 2), pygame.SRCALPHA)
-                pygame.draw.circle(radius_surface, (255, 255, 255, 50), (self.range, self.range), self.range, width=1)
-                screen.blit(radius_surface, (int(self.x) - self.range, int(self.y) - self.range))
+            radius_surface = pygame.Surface((self.range * 2, self.range * 2), pygame.SRCALPHA)
+            pygame.draw.circle(radius_surface, (255, 255, 255, 50), (self.range, self.range), self.range, width=1)
+            screen.blit(radius_surface, (int(self.x) - self.range, int(self.y) - self.range))
 
-        # Draw soldier body
         if self.is_dragging:
-            # Draw semi-transparent soldier while dragging
+            # Vẽ vòng tròn bán trong suốt khi đang kéo
             s = pygame.Surface((self.radius * 2, self.radius * 2), pygame.SRCALPHA)
             pygame.draw.circle(s, (0, 255, 0, 128), (self.radius, self.radius), self.radius)
             screen.blit(s, (self.x - self.radius, self.y - self.radius))
         else:
-            pygame.draw.circle(screen, GREEN, (int(self.x), int(self.y)), self.radius)
-        
-        # Draw soldier details with rotation
-        if not self.is_dragging:
-            # Calculate rotated points for the body
-            body_length = 20
-            body_width = 10
-            angle_rad = math.radians(self.angle)
-            
-            # Draw rotated body
-            body_points = [
-                (self.x + body_width * math.cos(angle_rad), self.y + body_width * math.sin(angle_rad)),
-                (self.x - body_width * math.cos(angle_rad), self.y - body_width * math.sin(angle_rad)),
-                (self.x + body_length * math.cos(angle_rad), self.y + body_length * math.sin(angle_rad)),
-                (self.x - body_length * math.cos(angle_rad), self.y - body_length * math.sin(angle_rad))
-            ]
-            pygame.draw.polygon(screen, BLUE, body_points)
-            
-            # Draw head
-            head_x = self.x + (self.radius - 5) * math.cos(angle_rad)
-            head_y = self.y + (self.radius - 5) * math.sin(angle_rad)
-            pygame.draw.circle(screen, YELLOW, (int(head_x), int(head_y)), 5)
-        
-        # Draw health bar
+            # Quay ảnh theo góc hiện tại
+            rotated_image = pygame.transform.rotate(self.image, -self.angle)
+            rotated_rect = rotated_image.get_rect(center=(self.x, self.y))
+            screen.blit(rotated_image, rotated_rect.topleft)
+
+        # Vẽ thanh máu
         health_bar_length = 30
         health_ratio = self.health / self.max_health
         health_bar_width = max(0, health_ratio * health_bar_length)
-        
-        pygame.draw.rect(screen, RED, (int(self.x) - health_bar_length//2, int(self.y) - 25, health_bar_length, 5))
-        pygame.draw.rect(screen, GREEN, (int(self.x) - health_bar_length//2, int(self.y) - 25, int(health_bar_width), 5)) 
+
+        pygame.draw.rect(screen, RED, (int(self.x) - health_bar_length // 2, int(self.y) - 25, health_bar_length, 5))
+        pygame.draw.rect(screen, GREEN,
+                         (int(self.x) - health_bar_length // 2, int(self.y) - 25, int(health_bar_width), 5))
+

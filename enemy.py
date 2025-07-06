@@ -21,6 +21,8 @@ class Enemy:
         self.attack_cooldown = 0  # Add attack cooldown
         self.attack_rate = 30  # Attack every 30 frames (0.5 seconds at 60 FPS)
         self.angle = 0
+        self.slow_timer = 0
+        self.original_speed = speed
 
     def move(self):
         if not self.path_index < len(self.path) - 1:
@@ -61,13 +63,19 @@ class Enemy:
         else:
             self.x += (dx / distance) * self.speed
             self.y += (dy / distance) * self.speed
-    
+
+        # Giảm thời gian slow
+        if self.slow_timer > 0:
+            self.slow_timer -= 1
+            if self.slow_timer <= 0:
+                self.speed = self.original_speed  # reset về tốc độ ban đầu
+
     def take_damage(self, damage: int):
         self.health -= damage
     
     def is_dead(self) -> bool:
         return self.health <= 0
-    
+
     def draw(self, screen: pygame.Surface):
         # Draw enemy
         pygame.draw.circle(screen, RED, (int(self.x), int(self.y)), self.radius)
@@ -79,6 +87,11 @@ class Enemy:
         
         pygame.draw.rect(screen, RED, (int(self.x) - health_bar_length//2, int(self.y) - 25, health_bar_length, 5))
         pygame.draw.rect(screen, GREEN, (int(self.x) - health_bar_length//2, int(self.y) - 25, int(health_bar_width), 5))
+
+    def apply_slow(self, factor: float, duration: int):
+        if self.speed > self.original_speed * factor:
+            self.speed = self.original_speed * factor
+            self.slow_timer = duration
 
 
 class BasicEnemy(Enemy):
